@@ -1,9 +1,7 @@
-sample0 :-
-    nl,initialize(X),dbDrawBoard(X).
-
 /*inicializa o tabuleiro com todas as posições vazias (estado inicial)*/
-initialize(Board) :-
-	Board = [[0,0,0],
+initial(Board):-
+    nl,
+    Board = [[0,0,0],
             [0,0,0,0,0], 
          	[0,0,0,0,0,0,0],  
          	[0,0,0,0,0,0,0,0,0], 
@@ -13,6 +11,22 @@ initialize(Board) :-
             [0,0,0,0,0], 
             [0,0,0]].
 
+/*estado final)*/
+final_state(Board):-
+    nl,
+    Board = [[1,1,2],
+            [1,2,2,1,2], 
+         	[1,1,2,2,2,1,1],  
+         	[1,2,2,2,1,1,1,1,2], 
+         	[1,2,1,1,2,1,1,1,2],
+            [1,2,2,2,2,1,1,2,1],
+            [1,2,1,2,1,1,2],
+            [2,2,2,1,2], 
+            [2,2,1]].
+    
+
+display_game(Board, Player):-
+        nl, initial(Board), dbDrawBoard(Board).
 
 dbDrawBoard(Board) :-
     write('  A   B   C   D   E   F   G   H   I'),nl,
@@ -58,5 +72,7 @@ dbDrawCell([X|Xs]) :-
 dbDrawCell([]) :-
     write('|').
             
-
+play:- 
+    
+    display_game(Board, blue).
 
