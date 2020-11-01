@@ -49,6 +49,7 @@ Em caso de empate, remover os discos posicionados mais perto das bordas, e recon
 # Representação do Estado de Jogo
 
 **Situação initial**: 
+```
 initial(Board):-
 		nl, 
 		Board = [[0,0,0],
@@ -60,10 +61,12 @@ initial(Board):-
 			  [0,0,0,0,0,0,0],
 			  [0,0,0,0,0],
 			  [0,0,0]].
+```
 
-![Situação inicial na consola](imagens/3.png =300x300)
+![Situação inicial na consola](imagens/3.png)
 
 **Situação intermédia**: 
+```
 intermediate_state(Board):-
 		nl, 
 		Board = [[0,0,0],
@@ -75,10 +78,12 @@ intermediate_state(Board):-
 			  [1,0,0,0,1,0,0],
 			  [0,0,0,0,0],
 			  [0,2,0]].
+```
 
-![Situação intermédia na consola](imagens/4.png =300x300)
+![Situação intermédia na consola](imagens/4.png)
 
 **Situação final**: 
+```
 final_state(Board):-
 		nl, 
 		Board = [[1,1,2],
@@ -90,5 +95,6 @@ final_state(Board):-
 			  [1,2,1,2,1,1,2],
 			  [2,2,2,1,2],
 			  [2,2,1]].
+```
 
-![Situação final na consola](imagens/5.png =300x300)
+![Situação final na consola](imagens/5.png)
