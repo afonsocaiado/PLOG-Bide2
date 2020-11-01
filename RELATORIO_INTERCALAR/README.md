@@ -98,3 +98,60 @@ final_state(Board):-
 ```
 
 ![Situação final na consola](imagens/5.png)
+
+# Visualização do Tabuleiro
+
+Para podermos visualizar o tabuleiro na consola, utilizamos o seguinte código:
+
+```
+dbDrawLine([X|Xs], Row) :-
+   dbDrawHLine(Row),
+   dbDrawCell(X),
+   write(' '),
+   write(Row),
+   NextRow is Row + 1,
+   nl,
+   dbDrawLine(Xs, NextRow).
+```
+
+Este predicado, para cada linha, chama as funções responsáveis por desenhar as divisões das linhas e as próprias linhas e no fim de cada linha desenha o número correspondente: Incrementa o número da linha chamando-se novamente até todas estarem desenhadas.
+
+```
+dbDrawLine([],_) :-
+   dbDrawLastHLine.
+
+dbDrawLastHLine:-
+   write('            +---+---+---+').
+```
+
+O predicado *dbDrawLine([],_)*, desenha uma última divisão do tabuleiro quando a última linha é desenhada.
+
+```
+dbDrawHLine(Row) :-
+   (Row==4; Row==6; Row==5) -> write('+---+---+---+---+---+---+---+---+---+'),nl;
+   (Row==7) -> write('+---+---+---+---+---+---+---+---+---+'),nl,write('    ');
+   (Row==3) -> write('    +---+---+---+---+---+---+---+    '), nl, write('    ');
+   (Row==8) -> write('    +---+---+---+---+---+---+---+    '), nl, write('        ');
+   (Row==2) -> write('        +---+---+---+---+---+        '), nl, write('        ');
+   (Row==9) -> write('        +---+---+---+---+---+        '), nl, write('            ');
+   (Row==1) -> write('            +---+---+---+            '), nl, write('            ').
+```
+
+O predicado *dbDrawHLine(Row)*, desenha as divisões do tabuleiro e de cada linha do tabuleiro.
+
+```
+dbDrawCell([X|Xs]) :-
+   write('|'),
+   X==0 -> write('   '), dbDrawCell(Xs);
+   X==1 -> write(' A '), dbDrawCell(Xs);
+   X==2 -> write(' V '), dbDrawCell(Xs).
+``` 
+
+Este predicado desenha cada célula e a sua divisão, conteúdo muda dependendo se a casa estiver vazia ou com uma peça. 
+
+```
+dbDrawCell([]) :-
+   write('|').
+```
+
+Desenha a última divisão de coluna de cada linha.
