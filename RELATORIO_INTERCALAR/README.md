@@ -2,7 +2,7 @@
 
 <img src="imagens/0.jpg" width="576" height="432">
 
-Trabalho realizado pelos aluno da turma 1 e 2 (respetivamente) de PLOG: 
+Trabalho realizado pelos aluno da turma 2 e 1 (respetivamente) de PLOG: 
 - Afonso Maria Rebordão Caiado de Sousa (up201806789)
 - Vasco Marques Lopes Teixeira (up201802112)
 
