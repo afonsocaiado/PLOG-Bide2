@@ -63,7 +63,7 @@ initial(Board):-
 			  [0,0,0]].
 ```
 
-![Situação inicial na consola](imagens/3.png)
+![Situação inicial na consola](imagens/3.jpg)
 
 **Situação intermédia**: 
 ```
