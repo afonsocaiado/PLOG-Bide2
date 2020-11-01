@@ -1,6 +1,6 @@
 # Bide_2 PLOG 202/2021
 
-<img src="imagens/0.jpg" width="576" height="432">
+<img src="imagens/imagemJogo.jpg" width="576" height="432">
 
 Trabalho realizado pelos aluno da turma 2 e 1 (respetivamente) de PLOG: 
 - Afonso Maria Rebordão Caiado de Sousa (up201806789)
@@ -12,7 +12,7 @@ Trabalho realizado pelos aluno da turma 2 e 1 (respetivamente) de PLOG:
 
 Um **Grupo** é uma coleção de todos os discos (adjacentes) conectados de uma só cor. Para obter a pontuação de um grupo, basta adicionar as pontuações de todos os seus discos.
 
-![Tabuleiro do Jogo](imagens/1.png)
+![Tabuleiro do Jogo](imagens/tabuleiroReal.png)
 
 ### Equipamento para o jogo
 
@@ -44,7 +44,7 @@ Quando o tabuleiro está cheio, os jogadores contam as pontuações.
 Cada disco vale o número de pontos equivalente à sua distância da borda mais próxima (começando por zero). O jogador que tenha o **Grupo** com a pontuação mais elevada, ganha.
 Em caso de empate, remover os discos posicionados mais perto das bordas, e recontar, até haver um vencedor. 
 
-![Contagem de pontos](imagens/2.png)
+![Contagem de pontos](imagens/explicacaoJogada.png)
 
 ##### **source: https://nestorgames.com/#bide_detail**
 
@@ -65,7 +65,7 @@ initial(Board):-
 			  [0,0,0]].
 ```
 
-![Situação inicial na consola](imagens/3.png)
+![Situação inicial na consola](imagens/tabuleiroInicial.png)
 
 ### **Situação intermédia**: 
 ```
@@ -82,7 +82,7 @@ intermediate_state(Board):-
 			  [0,2,0]].
 ```
 
-![Situação intermédia na consola](imagens/4.png)
+![Situação intermédia na consola](imagens/tabuleiroIntermedio.png)
 
 ### **Situação final**: 
 ```
@@ -99,7 +99,7 @@ final_state(Board):-
 			  [2,2,1]].
 ```
 
-![Situação final na consola](imagens/5.png)
+![Situação final na consola](imagens/tabuleiroFinal.png)
 
 # Visualização do Tabuleiro
 
