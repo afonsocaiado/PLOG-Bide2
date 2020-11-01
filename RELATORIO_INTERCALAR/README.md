@@ -61,6 +61,8 @@ initial(Board):-
 			  [0,0,0,0,0],
 			  [0,0,0]].
 
+![Situação inicial na consola](imagens/3.png =300x300)
+
 **Situação intermédia**: 
 intermediate_state(Board):-
 		nl, 
@@ -73,6 +75,8 @@ intermediate_state(Board):-
 			  [1,0,0,0,1,0,0],
 			  [0,0,0,0,0],
 			  [0,2,0]].
+
+![Situação intermédia na consola](imagens/4.png =300x300)
 
 **Situação final**: 
 final_state(Board):-
@@ -87,9 +91,4 @@ final_state(Board):-
 			  [2,2,2,1,2],
 			  [2,2,1]].
 
-
-![Situação inicial na consola](imagens/3.png)
-
-![Situação intermédia na consola](imagens/4.png)
-
-![Situação final na consola](imagens/5.png)
+![Situação final na consola](imagens/5.png =300x300)
