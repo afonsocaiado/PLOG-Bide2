@@ -10,6 +10,8 @@ other_player(red, blue).
 other_player(blue, red).
 playerValue(blue,1).
 playerValue(red,2).
+:- dynamic playerPieces/2.
+
 /*score positivo jogador 1 esta a ganhar e negativo o jogador 2 esta a ganhar*/
 %game_state(Board, Player, Score).
 
@@ -23,7 +25,9 @@ initial(Board):-
             [0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0],
             [0,0,0,0,0], 
-            [0,0,0]].
+            [0,0,0]],
+            assert(playerPieces(blue,0)),
+            assert(playerPieces(red,0)).
 
 /*estado intermédio*/
 intermediate_state(Board):-
@@ -113,8 +117,8 @@ game(Side, Board1, Score):-
         %smart_move(OtherSide, Board2, Board3),
         player_input_move_type(OtherSide, Board2, Board3),
         write('\n'), write(OtherSide), write(' moving:\n'),
-        display_game(Board3,Score),
-        game(Side, Board3,Score).
+        %display_game(Board3,Score),
+        game(Side, Board3, Score).
 
 
 play:- 
@@ -134,12 +138,15 @@ player_select_side(Player) :-
         (write('Invalid side, please type \'red.\' or \'blue.\'\n'), player_select_side(Player))
     ).
 
-/*reads the type of move the player wanta to execute and validates it*/
+/*reads the type of move the player wants to execute and validates it*/
 player_input_move_type(Side, Board1, Board2):-
-        write('Do you want to play, bide, or release? (p / b / r)'),
+        playerPieces(Side,Pieces),
+        Pieces1 is Pieces + 1,
+        write('You have '), write(Pieces1), write(' pieces..\n'),
+        write('Do you want to play, bide, or release? (p / b / r)\n'),
         read(MoveType),
         (MoveType = 'p' -> player_input_move(Side, Board1, Board2), !);
-        (MoveType = 'b' -> player_bide, !);
+        (MoveType = 'b' -> player_bide(Side,Pieces), append(Board1,[],Board2),!);
         (MoveType = 'r' -> player_release, !);
         (MoveType \= 'p', MoveType \= 'b', MoveType \= 'r') -> (write('Invalid character, please type \'p.\' or \'b.\' or \'r\' \n')), player_input_move_type(Side, Board1, Board2).
 
@@ -179,8 +186,16 @@ pos_is_empty(Board,X,Y,E) :-
 
 /*------------------------------ Movement Execution -------------------------*/
 
+player_bide(Side, Pieces):-
+    retract(playerPieces(Side,Pieces)),
+    Pieces1 is Pieces + 1,
+    assert(playerPieces(Side,Pieces1)).
+
 /*places a piece on the board in the chosen tile*/
 place_piece(Side,Board,NewBoard,X,Y):-
+    retract(playerPieces(Side,Pieces)),
+    Pieces1 is Pieces,
+    assert(playerPieces(Side,Pieces1)),
     playerValue(Side,Value),
     nth1(X,Board,Rs),
     (
