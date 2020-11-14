@@ -83,7 +83,4 @@ dbDrawCell([X|Xs]) :-
 /*desenha a ultima divisão de coluna de cada linha*/
 dbDrawCell([]) :-
     write('|').
-            
-play:-  
-    display_game(Board, blue).
 

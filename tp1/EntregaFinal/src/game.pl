@@ -49,19 +49,19 @@ play:-
 
 /*reads the side the player wants to be on (red or blue) and validates input*/
 player_select_side(Player) :-
-    write('Select your side (red/blue): '),
+    write('\nSelect your side (red/blue): '),
     read(Player_Side),
     (
         (player(Player_Side), Player = Player_Side, !);
-        (write('Invalid side, please type \'red.\' or \'blue.\'\n'), player_select_side(Player))
+        (write('\nInvalid side, please type \'red.\' or \'blue.\'\n'), player_select_side(Player))
     ).
 
 /*reads the type of move the player wants to execute and validates it*/
 player_input_move_type(Side, Board1, Board2):-
         playerPieces(Side,Pieces),
         Pieces1 is Pieces + 1,
-        write('You have '), write(Pieces1), write(' pieces..\n'),
-        write('Do you want to play, bide, or release? (p / b / r)\n'),
+        write('\nYou have '), write(Pieces1), write(' pieces..\n'),
+        write('\nDo you want to play, bide, or release? (p / b / r)\n'),
         read(MoveType),
         (
         (MoveType = 'p' -> player_input_move(Side, Board1, Board2), !);
@@ -71,11 +71,11 @@ player_input_move_type(Side, Board1, Board2):-
 
 /*reads the position the player wants to place a piece on and calls fucntions to validate if the position is legal*/
 player_input_move(Side, Board, NewBoard):- 
-    write('Choose where to move: (X-Y)'),
+    write('\nChoose where to move: (X-Y)'),
     read(X-Y),
     (
         valid_move(X,Y,Board);
-        (write('Invalid position. Retry: '), player_input_move(Side, Board, NewBoard))
+        (write('\nInvalid position. Retry: '), player_input_move(Side, Board, NewBoard))
     ), 
     place_piece(Side,Board,NewBoard,X,Y).
 
