@@ -14,44 +14,6 @@ playerValue(red,2).
 
 /*score positivo jogador 1 esta a ganhar e negativo o jogador 2 esta a ganhar*/
 %game_state(Board, Player, Score).
-
-/*inicializa o tabuleiro com todas as posições vazias (estado inicial)*/
-initial(Board):-
-    Board = [[0,0,0],
-            [0,0,0,0,0], 
-         	[0,0,0,0,0,0,0],  
-         	[0,0,0,0,0,0,0,0,0], 
-         	[0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0,0,0],
-            [0,0,0,0,0,0,0],
-            [0,0,0,0,0], 
-            [0,0,0]],
-            assert(playerPieces(blue,0)),
-            assert(playerPieces(red,0)).
-
-/*estado intermédio*/
-intermediate_state(Board):-
-    Board = [[0,0,0],
-            [0,0,0,0,0], 
-         	[1,0,0,1,2,0,0],  
-         	[0,2,0,0,0,0,0,0,0], 
-         	[0,0,2,0,0,0,0,0,0],
-            [0,0,0,1,0,0,0,0,0],
-            [1,0,0,0,2,0,0],
-            [0,0,0,0,0], 
-            [0,2,0]].
-
-/*estado final)*/
-final_state(Board):-
-    Board = [[1,1,2],
-            [1,2,2,1,2], 
-         	[1,1,2,2,2,1,1],  
-         	[1,2,2,2,1,1,1,1,2], 
-         	[1,2,1,1,2,1,1,1,2],
-            [1,2,2,2,2,1,1,2,1],
-            [1,2,1,2,1,1,2],
-            [2,2,2,1,2], 
-            [2,2,1]].
  
 /*--------------------- Miscellaneous Functions ------------------------*/
 value_of_y_based_on_x(X,Y,Y1):-
@@ -59,57 +21,6 @@ value_of_y_based_on_x(X,Y,Y1):-
         (X==2; X==8) -> Y1 is Y - 3;
         (X==3; X==7) -> Y1 is Y - 2;
         (X>3; X<7) -> Y1 is Y - 1.
-
-
-/*----------------------- Board Drawing Predicates ----------------------*/
-
-display_game(Board, Score):-
-        nl, dbDrawBoard(Board).
-
-dbDrawBoard(Board) :-
-    write('  1   2   3   4   5   6   7   8   9  <-Y X'),nl,
-	dbDrawLine(Board, 1).
-
-/*para cada linha chama as funcoes responsaveis por desenhar as divisoes das linhas e as próprias linhas*/
-/*e no fim de cada linha desenha o número correspondente e incrementa o número da linha chamando-se novamente até todas*/
-/*as linhas estarem desenhadas*/
-dbDrawLine([X|Xs], Row) :-
-    dbDrawHLine(Row),
-    dbDrawCell(X),
-    write(' '),
-    write(Row),
-    NextRow is Row + 1,
-    nl,
-    dbDrawLine(Xs, NextRow).
-
-/*quando a ultíma linha é desenhada desenha uma última divisão do tabuleiro*/
-dbDrawLine([],_) :-
-    dbDrawLastHLine.
-
-/*draws each line division of the board*/
-dbDrawHLine(Row) :-
-    (Row==4; Row==6; Row==5) -> write('+---+---+---+---+---+---+---+---+---+'),nl;
-    (Row==7) -> write('+---+---+---+---+---+---+---+---+---+'),nl,write('    ');
-    (Row==3) -> write('    +---+---+---+---+---+---+---+    '), nl, write('    ');
-    (Row==8) -> write('    +---+---+---+---+---+---+---+    '), nl, write('        ');
-    (Row==2) -> write('        +---+---+---+---+---+            V'), nl, write('        ');
-    (Row==9) -> write('        +---+---+---+---+---+        '), nl, write('            ');
-    (Row==1) -> write('            +---+---+---+                |'), nl, write('            ').
-
-dbDrawLastHLine:-
-    write('            +---+---+---+            \n').
-
-/*draws each cell and its division, content of the cell changes if the cell has a piece in it*/
-dbDrawCell([X|Xs]) :-
-    write('|'), 
-    X==0 -> write('   '), dbDrawCell(Xs);
-    X==1 -> write(' B '), dbDrawCell(Xs);
-    X==2 -> write(' R '), dbDrawCell(Xs).
-
-/*draws the last column division for each line*/
-dbDrawCell([]) :-
-    write('|').
-
 
 /*-------------------------- Basic Game Mechanisms --------------------------------*/
     
