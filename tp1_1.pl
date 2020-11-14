@@ -52,7 +52,14 @@ final_state(Board):-
             [1,2,1,2,1,1,2],
             [2,2,2,1,2], 
             [2,2,1]].
-    
+ 
+/*--------------------- Miscellaneous Functions ------------------------*/
+value_of_y_based_on_x(X,Y,Y1):-
+        (X==1; X==9) -> Y1 is Y - 4;
+        (X==2; X==8) -> Y1 is Y - 3;
+        (X==3; X==7) -> Y1 is Y - 2;
+        (X>3; X<7) -> Y1 is Y - 1.
+
 
 /*----------------------- Board Drawing Predicates ----------------------*/
 
@@ -60,7 +67,7 @@ display_game(Board, Score):-
         nl, dbDrawBoard(Board).
 
 dbDrawBoard(Board) :-
-    write('  1   2   3   4   5   6   7   8   9'),nl,
+    write('  1   2   3   4   5   6   7   8   9  <-Y X'),nl,
 	dbDrawLine(Board, 1).
 
 /*para cada linha chama as funcoes responsaveis por desenhar as divisoes das linhas e as próprias linhas*/
@@ -85,12 +92,12 @@ dbDrawHLine(Row) :-
     (Row==7) -> write('+---+---+---+---+---+---+---+---+---+'),nl,write('    ');
     (Row==3) -> write('    +---+---+---+---+---+---+---+    '), nl, write('    ');
     (Row==8) -> write('    +---+---+---+---+---+---+---+    '), nl, write('        ');
-    (Row==2) -> write('        +---+---+---+---+---+        '), nl, write('        ');
+    (Row==2) -> write('        +---+---+---+---+---+            V'), nl, write('        ');
     (Row==9) -> write('        +---+---+---+---+---+        '), nl, write('            ');
-    (Row==1) -> write('            +---+---+---+            '), nl, write('            ').
+    (Row==1) -> write('            +---+---+---+                |'), nl, write('            ').
 
 dbDrawLastHLine:-
-    write('            +---+---+---+\n').
+    write('            +---+---+---+            \n').
 
 /*draws each cell and its division, content of the cell changes if the cell has a piece in it*/
 dbDrawCell([X|Xs]) :-
@@ -145,10 +152,11 @@ player_input_move_type(Side, Board1, Board2):-
         write('You have '), write(Pieces1), write(' pieces..\n'),
         write('Do you want to play, bide, or release? (p / b / r)\n'),
         read(MoveType),
+        (
         (MoveType = 'p' -> player_input_move(Side, Board1, Board2), !);
         (MoveType = 'b' -> player_bide(Side,Pieces), append(Board1,[],Board2),!);
-        (MoveType = 'r' -> player_release, !);
-        (MoveType \= 'p', MoveType \= 'b', MoveType \= 'r') -> (write('Invalid character, please type \'p.\' or \'b.\' or \'r\' \n')), player_input_move_type(Side, Board1, Board2).
+        (MoveType = 'r' -> ((Pieces1>1)->(player_release(Side, Pieces1, Board1, Board2), !);(write('Not enough pieces to release!\n')), player_input_move_type(Side, Board1, Board2)));
+        (MoveType \= 'p', MoveType \= 'b', MoveType \= 'r') -> (write('Invalid character, please type \'p.\' or \'b.\' or \'r\' \n')), player_input_move_type(Side, Board1, Board2)).
 
 /*reads the position the player wants to place a piece on and calls fucntions to validate if the position is legal*/
 player_input_move(Side, Board, NewBoard):- 
@@ -177,14 +185,21 @@ inside_board(X,Y):-
 /*checks if the position chosen is empty*/
 pos_is_empty(Board,X,Y,E) :-
     X1 is X-1,
-    (
-        (X<4; X>6) -> Y1 is Y - 4;
-        (X>3, X<7) -> Y1 is Y-1
-    ),
+    value_of_y_based_on_x(X,Y,Y1),
     nth0(X1,Board,Rs),
     nth0(Y1,Rs,E).
 
 /*------------------------------ Movement Execution -------------------------*/
+player_release(Side, 0, Board1, NewBoard):-
+    retract(playerPieces(Side,_)),
+    assert(playerPieces(Side,0)),
+    append(Board1,[],NewBoard),!.
+
+player_release(Side, Pieces, Board1, Board2):-
+    player_input_move(Side, Board1, Board2),
+    display_game(Board2,0),
+    Pieces1 is Pieces - 1,
+    player_release(Side, Pieces1, Board2, Board3),!.
 
 player_bide(Side, Pieces):-
     retract(playerPieces(Side,Pieces)),
@@ -193,15 +208,9 @@ player_bide(Side, Pieces):-
 
 /*places a piece on the board in the chosen tile*/
 place_piece(Side,Board,NewBoard,X,Y):-
-    retract(playerPieces(Side,Pieces)),
-    Pieces1 is Pieces,
-    assert(playerPieces(Side,Pieces1)),
     playerValue(Side,Value),
     nth1(X,Board,Rs),
-    (
-        (X<4; X>6) -> Y1 is Y - 4;
-        (X>3, X<7) -> Y1 is Y-1
-    ),
+    value_of_y_based_on_x(X,Y,Y1),
     replace_element_in_list(Rs,Y1,Value,NewList),
     X1 is X-1,
     replace_list_in_board(Board, X1, NewList, NewBoard).
