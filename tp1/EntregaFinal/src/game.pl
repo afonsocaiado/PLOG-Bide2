@@ -46,7 +46,7 @@ game(Side, Board1, Score):-
 
 score_calculation(Board, Score, NewScore):-
     iterateThroughBoard(Board, ScoreSide, ScoreOtherSide),
-    NewScore is Score+ (ScoreSide - ScoreOtherSide).
+    NewScore is (ScoreSide - ScoreOtherSide).
 
 iterateThroughBoard([],ScoreSideTotal1, ScoreOtherSideTotal1):-
     ScoreSideTotal1 is 0, ScoreOtherSideTotal1 is 0.
