@@ -38,7 +38,7 @@ final_state(Board):-
     
 
 display_game(Board, Player):-
-        nl, initial(Board), dbDrawBoard(Board).
+        nl, dbDrawBoard(Board).
 
 dbDrawBoard(Board) :-
     write('  A   B   C   D   E   F   G   H   I'),nl,

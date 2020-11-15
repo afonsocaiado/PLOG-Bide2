@@ -27,16 +27,44 @@ value_of_y_based_on_x(X,Y,Y1):-
 game(Side, Board1, Score):-
         other_player(Side, OtherSide),
         display_game(Board1,Score),
+        write('\n'),write(Side), write(' playing!\n'),
+        score_calculation(Board1,Score, Score2),
+        write('Score: '), write(Score2), write('\n'),
         %can_move(OtherSide, Board1),
         player_input_move_type(Side, Board1, Board2),
         write('\n'), write(Side), write(' moving:\n'),
-        display_game(Board2,Score),
+        display_game(Board2,Score2),
+        write('\n'),write(OtherSide), write(' playing!\n'),
+        score_calculation(Board2,Score2, Score3),
+        write('Score: '), write(Score3), write('\n'),
         %can_move(OtherSide, Board2),
         %smart_move(OtherSide, Board2, Board3),
         player_input_move_type(OtherSide, Board2, Board3),
         write('\n'), write(OtherSide), write(' moving:\n'),
-        %display_game(Board3,Score),
-        game(Side, Board3, Score).
+        %display_game(Board3,Score3),
+        game(Side, Board3, Score3).
+
+score_calculation(Board, Score, NewScore):-
+    iterateThroughBoard(Board, ScoreSide, ScoreOtherSide),
+    NewScore is Score+ (ScoreSide - ScoreOtherSide).
+
+iterateThroughBoard([],ScoreSideTotal1, ScoreOtherSideTotal1):-
+    ScoreSideTotal1 is 0, ScoreOtherSideTotal1 is 0.
+iterateThroughBoard([HR|TR], ScoreSideTotal, ScoreOtherSideTotal):-
+    iterateThroughBoard(TR, ScoreSideTotal1, ScoreOtherSideTotal1),
+    iterateThroughRow(HR, ScoreSide, ScoreOtherSide),
+    ScoreSideTotal is ScoreSideTotal1 + ScoreSide,
+    ScoreOtherSideTotal is ScoreOtherSideTotal1 + ScoreOtherSide.
+
+iterateThroughRow([],ScoreSide1,ScoreOtherSide1):-
+    ScoreSide1 is 0, ScoreOtherSide1 is 0.
+iterateThroughRow([H|T], ScoreSide, ScoreOtherSide):-
+    iterateThroughRow(T, ScoreSide1, ScoreOtherSide1),
+    (
+        (H = 0, (ScoreOtherSide is ScoreOtherSide1 + 0, ScoreSide is ScoreSide1 + 0));
+        (H = 1, (ScoreSide is ScoreSide1 + 1, ScoreOtherSide is ScoreOtherSide1 + 0));
+        (H = 2, (ScoreOtherSide is ScoreOtherSide1 + 1, ScoreSide is ScoreSide1 + 0))
+    ).
 
 
 play:- 
@@ -75,7 +103,7 @@ player_input_move(Side, Board, NewBoard):-
     read(X-Y),
     (
         valid_move(X,Y,Board);
-        (write('\nInvalid position. Retry: '), player_input_move(Side, Board, NewBoard))
+        ((write('\nInvalid position. Retry: '), player_input_move(Side, Board, NewBoard)))
     ), 
     place_piece(Side,Board,NewBoard,X,Y).
 
