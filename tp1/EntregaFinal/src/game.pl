@@ -10,6 +10,7 @@ other_player(red, blue).
 other_player(blue, red).
 playerValue(blue,1).
 playerValue(red,2).
+
 :- dynamic playerPieces/2.
 
 /*score positivo jogador 1 esta a ganhar e negativo o jogador 2 esta a ganhar*/
@@ -25,17 +26,18 @@ value_of_y_based_on_x(X,Y,Y1):-
 /*-------------------------- Basic Game Mechanisms --------------------------------*/
     
 game(Side, Board1, Score):-
+        score_board(ScoreBoard),
         other_player(Side, OtherSide),
         display_game(Board1,Score),
         write('\n'),write(Side), write(' playing!\n'),
-        score_calculation(Board1,Score, Score2),
+        score_calculation(Board1, ScoreBoard, Score, Score2),
         write('Score: '), write(Score2), write('\n'),
         %can_move(OtherSide, Board1),
         player_input_move_type(Side, Board1, Board2),
         write('\n'), write(Side), write(' moving:\n'),
         display_game(Board2,Score2),
         write('\n'),write(OtherSide), write(' playing!\n'),
-        score_calculation(Board2,Score2, Score3),
+        score_calculation(Board2, ScoreBoard, Score2, Score3),
         write('Score: '), write(Score3), write('\n'),
         %can_move(OtherSide, Board2),
         %smart_move(OtherSide, Board2, Board3),
@@ -44,26 +46,26 @@ game(Side, Board1, Score):-
         %display_game(Board3,Score3),
         game(Side, Board3, Score3).
 
-score_calculation(Board, Score, NewScore):-
-    iterateThroughBoard(Board, ScoreSide, ScoreOtherSide),
+score_calculation(Board, ScoreBoard, Score, NewScore):-
+    iterateThroughBoard(Board, ScoreBoard, ScoreSide, ScoreOtherSide),
     NewScore is (ScoreSide - ScoreOtherSide).
 
-iterateThroughBoard([],ScoreSideTotal1, ScoreOtherSideTotal1):-
+iterateThroughBoard([], [], ScoreSideTotal1, ScoreOtherSideTotal1):-
     ScoreSideTotal1 is 0, ScoreOtherSideTotal1 is 0.
-iterateThroughBoard([HR|TR], ScoreSideTotal, ScoreOtherSideTotal):-
-    iterateThroughBoard(TR, ScoreSideTotal1, ScoreOtherSideTotal1),
-    iterateThroughRow(HR, ScoreSide, ScoreOtherSide),
+iterateThroughBoard([HR|TR], [SBH|SBT], ScoreSideTotal, ScoreOtherSideTotal):-
+    iterateThroughBoard(TR, SBT, ScoreSideTotal1, ScoreOtherSideTotal1),
+    iterateThroughRow(HR, SBH, ScoreSide, ScoreOtherSide),
     ScoreSideTotal is ScoreSideTotal1 + ScoreSide,
     ScoreOtherSideTotal is ScoreOtherSideTotal1 + ScoreOtherSide.
 
-iterateThroughRow([],ScoreSide1,ScoreOtherSide1):-
+iterateThroughRow([], [], ScoreSide1,ScoreOtherSide1):-
     ScoreSide1 is 0, ScoreOtherSide1 is 0.
-iterateThroughRow([H|T], ScoreSide, ScoreOtherSide):-
-    iterateThroughRow(T, ScoreSide1, ScoreOtherSide1),
+iterateThroughRow([H|T], [SBH|SBT], ScoreSide, ScoreOtherSide):-
+    iterateThroughRow(T, SBT, ScoreSide1, ScoreOtherSide1),
     (
         (H = 0, (ScoreOtherSide is ScoreOtherSide1 + 0, ScoreSide is ScoreSide1 + 0));
-        (H = 1, (ScoreSide is ScoreSide1 + 1, ScoreOtherSide is ScoreOtherSide1 + 0));
-        (H = 2, (ScoreOtherSide is ScoreOtherSide1 + 1, ScoreSide is ScoreSide1 + 0))
+        (H = 1, (ScoreSide is ScoreSide1 + (1 * SBH), ScoreOtherSide is ScoreOtherSide1 + 0));
+        (H = 2, (ScoreOtherSide is ScoreOtherSide1 + (1 * SBH), ScoreSide is ScoreSide1 + 0))
     ).
 
 
