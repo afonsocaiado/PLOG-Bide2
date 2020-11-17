@@ -52,7 +52,7 @@ display_game(Board, Player):-
         nl, dbDrawBoard(Board).
 
 dbDrawBoard(Board) :-
-    write('  A   B   C   D   E   F   G   H   I'),nl,
+    write('  1   2   3   4   5   6   7   8   9'),nl,
 	dbDrawLine(Board, 1).
 
 /*para cada linha chama as funcoes responsaveis por desenhar as divisoes das linhas e as próprias linhas*/

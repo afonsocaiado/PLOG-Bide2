@@ -94,20 +94,19 @@ player_input_move_type(Side, Board1, Board2):-
         write('\nDo you want to play, bide, or release? (p / b / r)\n'),
         read(MoveType),
         (
-        (MoveType = 'p' -> player_input_move(Side, Board1, Board2), !);
+        (MoveType = 'p' -> player_input_move(Side, Board1, X, Y), place_piece(Side,Board1,Board2,X,Y),!);
         (MoveType = 'b' -> player_bide(Side,Pieces), append(Board1,[],Board2),!);
         (MoveType = 'r' -> ((Pieces1>1)->(player_release(Side, Pieces1, Board1, Board2), !);(write('Not enough pieces to release!\n')), player_input_move_type(Side, Board1, Board2)));
         (MoveType \= 'p', MoveType \= 'b', MoveType \= 'r') -> (write('Invalid character, please type \'p.\' or \'b.\' or \'r\' \n')), player_input_move_type(Side, Board1, Board2)).
 
 /*reads the position the player wants to place a piece on and calls fucntions to validate if the position is legal*/
-player_input_move(Side, Board, NewBoard):- 
+player_input_move(Side, Board, XF, YF):- 
     write('\nChoose where to move: (X-Y)'),
     read(X-Y),
     (
-        valid_move(X,Y,Board);
-        ((write('\nInvalid position. Retry: '), player_input_move(Side, Board, NewBoard)))
-    ), 
-    place_piece(Side,Board,NewBoard,X,Y).
+        (valid_move(X,Y,Board), XF is X, YF is Y);
+        (write('\nInvalid position. Retry: '),player_input_move(Side, Board, X1, Y1), XF is X1, YF is Y1)
+    ).
 
 /*----------------------------- Movement Validations ---------------------------------*/
 
