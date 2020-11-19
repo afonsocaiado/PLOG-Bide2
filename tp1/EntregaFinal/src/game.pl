@@ -23,6 +23,23 @@ value_of_y_based_on_x(X,Y,Y1):-
         (X==3; X==7) -> Y1 is Y - 2;
         (X>3; X<7) -> Y1 is Y - 1.
 
+adjacent(X, Y, X1, Y1):-
+    /*inside_board(X1, Y1),*/
+    (
+        (X1 is X, Y1 is Y+1);
+        (X1 is X, Y1 is Y-1);
+        (X1 is X+1, Y1 is Y);
+        (X1 is X+1, Y1 is Y-1);
+        (X1 is X+1, Y1 is Y+1);
+        (X1 is X-1, Y1 is Y);
+        (X1 is X-1, Y1 is Y-1);
+        (X1 is X-1, Y1 is Y+1)
+    ).
+
+find_adjacent_cells(X, Y, ListAdjX, ListAdjY):-
+    findall(X1,adjacent(X,Y,X1,Y1),ListAdjX),
+    findall(Y1,adjacent(X,Y,X1,Y1),ListAdjY).
+
 /*-------------------------- Basic Game Mechanisms --------------------------------*/
     
 game(Side, Board1, Score):-
@@ -117,10 +134,10 @@ valid_move(X,Y,Board):-
 
 /*checks if the position chosen is inside the board*/
 inside_board(X,Y):-
-        ((X==1; X==9), (Y>3,Y<7));
-        ((X==2; X==8), (Y>2,Y<8));
-        ((X==3; X==7), (Y>1,Y<9));
-        ((X>3; X<7), (Y>0,Y<10)).
+        ((X=1; X=9), (Y>3,Y<7));
+        ((X=2; X=8), (Y>2,Y<8));
+        ((X=3; X=7), (Y>1,Y<9));
+        ((X>3, X<7), (Y>0,Y<10)).
 
 /*checks if the position chosen is empty*/
 pos_is_empty(Board,X,Y,E) :-
@@ -129,6 +146,30 @@ pos_is_empty(Board,X,Y,E) :-
     nth0(X1,Board,Rs),
     nth0(Y1,Rs,E).
 
+knockback_move(Board,_,_,[],NewBoard):-
+    NewBoard is Board.
+knockback_move(Board, X, Y,[HeadAdjX|TailAdjX], [HeadAdjY|TailAdjY], NewBoard):-
+    knockback_move(Board, X, Y, TailAdjX, TailAdjY, NewBoard1),
+    (
+        \+pos_is_empty(HeadAdjX,HeadAdjY), knockback_direction(X,Y,HeadAdjX,HeadAdjY,Dir), knockback_ramification(HeadAdjX, HeadAdjY, Dir);
+        pos_is_empty(HeadAdjX,HeadAdjY), knockback_direction(X,Y,HeadAdjX,HeadAdjY,Dir), knock_it_back(HeadAdjX,HeadAdjY,Dir)
+    ).
+
+knockback_ramification(HeadAdjX, HeadAdjY, Dir):-
+    (
+        %Dir = 'Up' -> ;
+        %Dir = 'Down' -> ;
+        %Dir = 'Left' -> ;
+        %Dir = 'Right' -> ;
+        %Dir = 'DiagUL' -> ;
+        %Dir = 'DiagDL' -> ;
+        %Dir = 'DiagUR' -> ;
+        %Dir = 'DiagUR' -> 
+        write('poop')
+    ).
+
+knock_it_back():-
+    
 /*------------------------------ Movement Execution -------------------------*/
 player_release(Side, 0, Board1, NewBoard):-
     retract(playerPieces(Side,_)),
