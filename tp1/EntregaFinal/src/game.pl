@@ -18,27 +18,33 @@ playerValue(red,2).
  
 /*--------------------- Miscellaneous Functions ------------------------*/
 value_of_y_based_on_x(X,Y,Y1):-
-        (X==1; X==9) -> Y1 is Y - 4;
-        (X==2; X==8) -> Y1 is Y - 3;
-        (X==3; X==7) -> Y1 is Y - 2;
+        (X=1; X=9) -> Y1 is Y - 4;
+        (X=2; X=8) -> Y1 is Y - 3;
+        (X=3; X=7) -> Y1 is Y - 2;
         (X>3; X<7) -> Y1 is Y - 1.
 
-adjacent(X, Y, X1, Y1):-
+reverse_value_of_y_based_on_x(X,Y,Y1):-
+        (X=1; X=9) -> Y1 is Y + 4;
+        (X=2; X=8) -> Y1 is Y + 3;
+        (X=3; X=7) -> Y1 is Y + 2;
+        (X>3; X<7) -> Y1 is Y+1.
+
+adjacent(Board, X, Y, X1, Y1):-
     /*inside_board(X1, Y1),*/
     (
-        (X1 is X, Y1 is Y+1);
-        (X1 is X, Y1 is Y-1);
-        (X1 is X+1, Y1 is Y);
-        (X1 is X+1, Y1 is Y-1);
-        (X1 is X+1, Y1 is Y+1);
-        (X1 is X-1, Y1 is Y);
-        (X1 is X-1, Y1 is Y-1);
-        (X1 is X-1, Y1 is Y+1)
+        (X1 is X, Yt is Y+1, get_player_by_pos(X1,Yt, Board, 1, P), P\=0, reverse_value_of_y_based_on_x(X1,Yt, Y1));
+        (X1 is X, Yt is Y-1, get_player_by_pos(X1,Yt, Board, 1, P), P\=0, reverse_value_of_y_based_on_x(X1,Yt, Y1));
+        (X1 is X+1, Yt is Y, get_player_by_pos(X1,Yt, Board, 1, P), P\=0, reverse_value_of_y_based_on_x(X1,Yt, Y1));
+        (X1 is X+1, Yt is Y-1, get_player_by_pos(X1,Yt, Board, 1, P), P\=0, reverse_value_of_y_based_on_x(X1,Yt, Y1));
+        (X1 is X+1, Yt is Y+1, get_player_by_pos(X1,Yt, Board, 1, P), P\=0, reverse_value_of_y_based_on_x(X1,Yt, Y1));
+        (X1 is X-1, Yt is Y, get_player_by_pos(X1,Yt, Board, 1, P), P\=0, reverse_value_of_y_based_on_x(X1,Yt, Y1));
+        (X1 is X-1, Yt is Y-1, get_player_by_pos(X1,Yt, Board, 1, P), P\=0, reverse_value_of_y_based_on_x(X1,Yt, Y1));
+        (X1 is X-1, Yt is Y+1, get_player_by_pos(X1,Yt, Board, 1, P), P\=0, reverse_value_of_y_based_on_x(X1,Yt, Y1))
     ).
 
-find_adjacent_cells(X, Y, ListAdjX, ListAdjY):-
-    findall(X1,adjacent(X,Y,X1,Y1),ListAdjX),
-    findall(Y1,adjacent(X,Y,X1,Y1),ListAdjY).
+find_adjacent_cells(Board, X, Y, ListAdjX, ListAdjY):-
+    findall(X1,adjacent(Board,X,Y,X1,Y1),ListAdjX),
+    findall(Y1,adjacent(Board,X,Y,X1,Y1),ListAdjY).
 
 /*-------------------------- Basic Game Mechanisms --------------------------------*/
     
@@ -111,7 +117,7 @@ player_input_move_type(Side, Board1, Board2):-
         write('\nDo you want to play, bide, or release? (p / b / r)\n'),
         read(MoveType),
         (
-        (MoveType = 'p' -> player_input_move(Side, Board1, X, Y), place_piece(Side,Board1,Board2,X,Y),!);
+        (MoveType = 'p' -> player_input_move(Side, Board1, X, Y), player_move(Side,Board1,Board2,X,Y),!);
         (MoveType = 'b' -> player_bide(Side,Pieces), append(Board1,[],Board2),!);
         (MoveType = 'r' -> ((Pieces1>1)->(player_release(Side, Pieces1, Board1, Board2), !);(write('Not enough pieces to release!\n')), player_input_move_type(Side, Board1, Board2)));
         (MoveType \= 'p', MoveType \= 'b', MoveType \= 'r') -> (write('Invalid character, please type \'p.\' or \'b.\' or \'r\' \n')), player_input_move_type(Side, Board1, Board2)).
@@ -146,14 +152,19 @@ pos_is_empty(Board,X,Y,E) :-
     nth0(X1,Board,Rs),
     nth0(Y1,Rs,E).
 
-knockback_move(Board,_,_,[],NewBoard):-
-    NewBoard is Board.
+knockback_move(Board,_,_,[],[],NewBoard):-
+    append(Board,[],NewBoard).
 knockback_move(Board, X, Y,[HeadAdjX|TailAdjX], [HeadAdjY|TailAdjY], NewBoard):-
     knockback_move(Board, X, Y, TailAdjX, TailAdjY, NewBoard1),
     (
-        \+pos_is_empty(HeadAdjX,HeadAdjY), knockback_direction(X,Y,HeadAdjX,HeadAdjY,Dir), knockback_ramification(HeadAdjX, HeadAdjY, Dir);
-        pos_is_empty(HeadAdjX,HeadAdjY), knockback_direction(X,Y,HeadAdjX,HeadAdjY,Dir), knock_it_back(HeadAdjX,HeadAdjY,Dir)
+        (knockback_direction(X,Y,HeadAdjX,HeadAdjY,DirX,DirY), KX is HeadAdjX + DirX, KY is HeadAdjY + DirY,  pos_is_empty(NewBoard1,KX,KY,0), inside_board(KX,KY), knock_it_back(NewBoard1,HeadAdjX,HeadAdjY,KX,KY,NewBoard));
+        
+        (pos_is_empty(NewBoard1,HeadAdjX,HeadAdjY,0))
     ).
+
+knockback_direction(X,Y,HeadAdjX,HeadAdjY,DirX,DirY):-
+    DirX is HeadAdjX - X,
+    DirY is HeadAdjY - Y.
 
 knockback_ramification(HeadAdjX, HeadAdjY, Dir):-
     (
@@ -164,11 +175,29 @@ knockback_ramification(HeadAdjX, HeadAdjY, Dir):-
         %Dir = 'DiagUL' -> ;
         %Dir = 'DiagDL' -> ;
         %Dir = 'DiagUR' -> ;
-        %Dir = 'DiagUR' -> 
+        %Dir = 'DiagDR' -> 
         write('poop')
     ).
 
-knock_it_back():-
+knock_it_back(Board,HeadAdjX,HeadAdjY,KX, KY,NewBoard):-
+    value_of_y_based_on_x(HeadAdjX,HeadAdjY, Y1),
+    get_player_by_pos(HeadAdjX,Y1,Board, 1, Player),
+    remove_piece(Board, Board1, HeadAdjX, HeadAdjY),
+    playerValue(P,Player),
+    place_piece(P, Board1, NewBoard, KX, KY). 
+
+
+get_player_by_pos(X,Y,[H|T], X, Player):-
+        get_player_by_pos_row(Y, H, 0, Player),!.
+get_player_by_pos(X,Y, [H|T], Counter, Player):-
+        Counter1 is Counter + 1,
+        get_player_by_pos(X,Y, T, Counter1, Player).
+
+get_player_by_pos_row(Y,[H|T], Y, Player):-
+        Player is H, !.
+get_player_by_pos_row(Y, [H|T], Counter, Player):-
+        Counter1 is Counter + 1,
+        get_player_by_pos_row(Y, T, Counter1, Player).
     
 /*------------------------------ Movement Execution -------------------------*/
 player_release(Side, 0, Board1, NewBoard):-
@@ -187,9 +216,29 @@ player_bide(Side, Pieces):-
     Pieces1 is Pieces + 1,
     assert(playerPieces(Side,Pieces1)).
 
+player_move(Side,Board,NewBoard,X,Y):-
+    place_piece(Side,Board,Board2,X,Y),
+    value_of_y_based_on_x(X,Y,Y1),
+    find_adjacent_cells(Board2, X, Y1, ListAdjX, ListAdjY),
+    move_adjacent_cells(Board2, X, Y, ListAdjX, ListAdjY, NewBoard).
+
+move_adjacent_cells(Board, _,_, [],[], NewBoard):-
+    append(Board,[],NewBoard).
+move_adjacent_cells(Board, X, Y, ListAdjX, ListAdjY, NewBoard):-
+    knockback_move(Board, X, Y,ListAdjX, ListAdjY, NewBoard).
+
+
 /*places a piece on the board in the chosen tile*/
 place_piece(Side,Board,NewBoard,X,Y):-
     playerValue(Side,Value),
+    nth1(X,Board,Rs),
+    value_of_y_based_on_x(X,Y,Y1),
+    replace_element_in_list(Rs,Y1,Value,NewList),
+    X1 is X-1,
+    replace_list_in_board(Board, X1, NewList, NewBoard).
+
+remove_piece(Board,NewBoard,X,Y):-
+    Value is 0,
     nth1(X,Board,Rs),
     value_of_y_based_on_x(X,Y,Y1),
     replace_element_in_list(Rs,Y1,Value,NewList),
