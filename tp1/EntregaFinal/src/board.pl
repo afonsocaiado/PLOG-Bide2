@@ -48,7 +48,7 @@ score_board(ScoreBoard):-
                [0,1,1,1,0],
                [0,0,0]].
 
-display_game(Board, Player):-
+display_game(Board):-
         nl, dbDrawBoard(Board).
 
 dbDrawBoard(Board) :-

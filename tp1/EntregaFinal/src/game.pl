@@ -51,14 +51,14 @@ find_adjacent_cells(Board, X, Y, ListAdjX, ListAdjY):-
 game(Side, Board1, Score):-
         score_board(ScoreBoard),
         other_player(Side, OtherSide),
-        display_game(Board1,Score),
+        display_game(Board1),
         write('\n'),write(Side), write(' playing!\n'),
         score_calculation(Board1, ScoreBoard, Score, Score2),
         write('Score: '), write(Score2), write('\n'),
         %can_move(OtherSide, Board1),
         player_input_move_type(Side, Board1, Board2),
         write('\n'), write(Side), write(' moving:\n'),
-        display_game(Board2,Score2),
+        display_game(Board2),
         write('\n'),write(OtherSide), write(' playing!\n'),
         score_calculation(Board2, ScoreBoard, Score2, Score3),
         write('Score: '), write(Score3), write('\n'),
@@ -66,7 +66,7 @@ game(Side, Board1, Score):-
         %smart_move(OtherSide, Board2, Board3),
         player_input_move_type(OtherSide, Board2, Board3),
         write('\n'), write(OtherSide), write(' moving:\n'),
-        %display_game(Board3,Score3),
+        %display_game(Board3),
         game(Side, Board3, Score3).
 
 score_calculation(Board, ScoreBoard, Score, NewScore):-
@@ -157,27 +157,24 @@ knockback_move(Board,_,_,[],[],NewBoard):-
 knockback_move(Board, X, Y,[HeadAdjX|TailAdjX], [HeadAdjY|TailAdjY], NewBoard):-
     knockback_move(Board, X, Y, TailAdjX, TailAdjY, NewBoard1),
     (
-        (knockback_direction(X,Y,HeadAdjX,HeadAdjY,DirX,DirY), KX is HeadAdjX + DirX, KY is HeadAdjY + DirY,  pos_is_empty(NewBoard1,KX,KY,0), inside_board(KX,KY), knock_it_back(NewBoard1,HeadAdjX,HeadAdjY,KX,KY,NewBoard));
-        
-        (pos_is_empty(NewBoard1,HeadAdjX,HeadAdjY,0))
+        (knockback_direction(X,Y,HeadAdjX,HeadAdjY,DirX,DirY), KX is HeadAdjX + DirX, KY is HeadAdjY + DirY,  pos_is_empty(NewBoard1,KX,KY,0), inside_board(KX,KY), knock_it_back(NewBoard1,HeadAdjX,HeadAdjY,KX,KY,NewBoard)); 
+        (knockback_direction(X,Y,HeadAdjX,HeadAdjY,DirX,DirY), KX is HeadAdjX + DirX, KY is HeadAdjY + DirY, knockback_ramification(NewBoard1, HeadAdjX, HeadAdjY, KX, KY, DirX, DirY, NewBoard));
+        (append(NewBoard1,[],NewBoard))
     ).
 
 knockback_direction(X,Y,HeadAdjX,HeadAdjY,DirX,DirY):-
     DirX is HeadAdjX - X,
     DirY is HeadAdjY - Y.
 
-knockback_ramification(HeadAdjX, HeadAdjY, Dir):-
+knockback_ramification(Board, HeadAdjX, HeadAdjY, KX, KY, DirX, DirY, NewBoard):-
+    inside_board(KX,KY),
     (
-        %Dir = 'Up' -> ;
-        %Dir = 'Down' -> ;
-        %Dir = 'Left' -> ;
-        %Dir = 'Right' -> ;
-        %Dir = 'DiagUL' -> ;
-        %Dir = 'DiagDL' -> ;
-        %Dir = 'DiagUR' -> ;
-        %Dir = 'DiagDR' -> 
-        write('poop')
-    ).
+         (pos_is_empty(Board,KX,KY,0), append(Board,[],Board1));
+         (KX1 is KX + DirX, KY1 is KY + DirY, knockback_ramification(Board, KX, KY, KX1, KY1, DirX, DirY, Board1))
+    ),
+    knock_it_back(Board1,HeadAdjX,HeadAdjY,KX,KY,NewBoard).
+
+
 
 knock_it_back(Board,HeadAdjX,HeadAdjY,KX, KY,NewBoard):-
     value_of_y_based_on_x(HeadAdjX,HeadAdjY, Y1),
@@ -205,11 +202,12 @@ player_release(Side, 0, Board1, NewBoard):-
     assert(playerPieces(Side,0)),
     append(Board1,[],NewBoard),!.
 
-player_release(Side, Pieces, Board1, Board2):-
-    player_input_move(Side, Board1, Board2),
-    display_game(Board2,0),
+player_release(Side, Pieces, Board, NewBoard):-
     Pieces1 is Pieces - 1,
-    player_release(Side, Pieces1, Board2, Board3),!.
+    player_release(Side, Pieces1, Board, Board1),
+    player_input_move(Side, Board1, XF, YF),
+    player_move(Side, Board1, NewBoard, XF, YF),
+    display_game(NewBoard).
 
 player_bide(Side, Pieces):-
     retract(playerPieces(Side,Pieces)),
