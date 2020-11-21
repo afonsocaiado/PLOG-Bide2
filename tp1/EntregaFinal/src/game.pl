@@ -134,15 +134,16 @@ player_select_side(Player) :-
 /*reads the type of move the player wants to execute and validates it*/
 player_input_move_type(Side, Board1, Board2):-
         playerPieces(Side,Pieces),
-        Pieces1 is Pieces,
+        Pieces1 is Pieces + 1,
         write('\nYou have '), write(Pieces1), write(' pieces..\n'),
         write('\nDo you want to play, bide, or release? (p / b / r)\n'),
         read(MoveType),
         (
-        (MoveType = 'p' -> player_input_move(Side, Board1, X, Y), player_move(Side,Board1,Board2,X,Y),!);
-        (MoveType = 'b' -> (Pieces1<MaxPieces)->(player_bide(Side,Pieces), append(Board1,[],Board2),!);(write('Can\'t bide again!\n'), player_input_move_type(Side, Board1, Board2)));
-        (MoveType = 'r' -> ((Pieces1>1)->(player_release(Side, Pieces1, Board1, Board2),!);(write('Not enough pieces to release!\n'), player_input_move_type(Side, Board1, Board2))));
-        (MoveType \= 'p', MoveType \= 'b', MoveType \= 'r') -> (write('Invalid character, please type \'p.\' or \'b.\' or \'r\' \n')), player_input_move_type(Side, Board1, Board2)).
+            (MoveType = 'p' -> player_input_move(Side, Board1, X, Y), player_move(Side,Board1,Board2,X,Y),!);
+            (MoveType = 'b' -> ((player_bide(Side,Pieces), append(Board1,[],Board2),!);(write('Can\'t bide again!\n'), player_input_move_type(Side, Board1, Board2))));
+            (MoveType = 'r' -> ((Pieces1>1)->(player_release(Side, Pieces1, Board1, Board2),!);(write('Not enough pieces to release!\n'), player_input_move_type(Side, Board1, Board2))));
+            (MoveType \= 'p', MoveType \= 'b', MoveType \= 'r') -> (write('Invalid character, please type \'p.\' or \'b.\' or \'r\' \n')), player_input_move_type(Side, Board1, Board2)
+        ).
 
 /*reads the position the player wants to place a piece on and calls fucntions to validate if the position is legal*/
 player_input_move(Side, Board, XF, YF):- 
