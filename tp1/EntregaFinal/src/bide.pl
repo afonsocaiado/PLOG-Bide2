@@ -4,5 +4,5 @@
 :- use_module(library(random)).
 :- use_module(library(system)).
 
-bide :-
+play :-
     mainMenu.

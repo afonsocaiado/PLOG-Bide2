@@ -10,7 +10,9 @@ initial(Board):-
             [0,0,0,0,0], 
             [0,0,0]],
             assert(playerPieces(blue,0)),
-            assert(playerPieces(red,0)).
+            assert(playerPieces(red,0)),
+            assert(playerMaxPieces(blue,29)),
+            assert(playerMaxPieces(red,29)).
 
 /*estado intermédio*/
 intermediate_state(Board):-
@@ -30,11 +32,15 @@ final_state(Board):-
             [1,2,2,1,2], 
          	[1,1,2,2,2,1,1],  
          	[1,2,2,2,1,1,1,1,2], 
-         	[1,2,1,1,2,1,1,1,2],
-            [1,2,2,2,2,1,1,2,1],
+         	[1,2,1,0,2,1,1,1,2],
+            [1,2,2,2,0,1,1,2,1],
             [1,2,1,2,1,1,2],
             [2,2,2,1,2], 
-            [2,2,1]].
+            [2,2,1]],
+            assert(playerPieces(blue,0)),
+            assert(playerPieces(red,0)),
+            assert(playerMaxPieces(blue,29)),
+            assert(playerMaxPieces(red,29)).
     
 
 score_board(ScoreBoard):-

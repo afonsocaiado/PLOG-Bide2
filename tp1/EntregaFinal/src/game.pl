@@ -12,6 +12,7 @@ playerValue(blue,1).
 playerValue(red,2).
 
 :- dynamic playerPieces/2.
+:- dynamic playerMaxPieces/2.
 
 /*score positivo jogador 1 esta a ganhar e negativo o jogador 2 esta a ganhar*/
 %game_state(Board, Player, Score).
@@ -52,21 +53,22 @@ game(Side, Board1, Score):-
         score_board(ScoreBoard),
         other_player(Side, OtherSide),
         display_game(Board1),
+        game_over(Board1, Score),
         write('\n'),write(Side), write(' playing!\n'),
         score_calculation(Board1, ScoreBoard, Score, Score2),
         write('Score: '), write(Score2), write('\n'),
-        %can_move(OtherSide, Board1),
         player_input_move_type(Side, Board1, Board2),
         write('\n'), write(Side), write(' moving:\n'),
         display_game(Board2),
+        game_over(Board2, Score2),
         write('\n'),write(OtherSide), write(' playing!\n'),
         score_calculation(Board2, ScoreBoard, Score2, Score3),
+        game_over(Board2,Score3),
         write('Score: '), write(Score3), write('\n'),
         %can_move(OtherSide, Board2),
         %smart_move(OtherSide, Board2, Board3),
         player_input_move_type(OtherSide, Board2, Board3),
         write('\n'), write(OtherSide), write(' moving:\n'),
-        %display_game(Board3),
         game(Side, Board3, Score3).
 
 score_calculation(Board, ScoreBoard, Score, NewScore):-
@@ -90,12 +92,32 @@ iterateThroughRow([H|T], [SBH|SBT], ScoreSide, ScoreOtherSide):-
         (H = 1, (ScoreSide is ScoreSide1 + (1 * SBH), ScoreOtherSide is ScoreOtherSide1 + 0));
         (H = 2, (ScoreOtherSide is ScoreOtherSide1 + (1 * SBH), ScoreSide is ScoreSide1 + 0))
     ).
+    
+announceResult(Score):-
+    (
+    Score>0 -> write('\nBlue Wins by '), write(Score), write(' points!!!!');
+    Score<0 -> write('\nRed Wins by '), Score1 is Score *(-1), write(Score1), write(' points!!!!');
+    Score=0 -> write('\nIt\'s a draw!!!')
+    ).
 
+game_over(Board, Score):-
+    iterate(Board)-> announceResult(Score),fail; write('').
 
-play:- 
+iterate([]).
+iterate([H|T]):-
+    iterateRow(H),
+    iterate(T).
+
+iterateRow([]).
+iterateRow([H|T]):-
+    (H = 0) -> fail;
+    (H \= 0) -> iterateRow(T).
+
+play_game:- 
     player_select_side(Player),
-    initial(Board),
-    game(Player, Board, 0).
+    final_state(Board),
+    (game(Player, Board, 0);
+    mainMenu).
 
 
 /* -----------player input --------------*/
@@ -112,14 +134,14 @@ player_select_side(Player) :-
 /*reads the type of move the player wants to execute and validates it*/
 player_input_move_type(Side, Board1, Board2):-
         playerPieces(Side,Pieces),
-        Pieces1 is Pieces + 1,
+        Pieces1 is Pieces,
         write('\nYou have '), write(Pieces1), write(' pieces..\n'),
         write('\nDo you want to play, bide, or release? (p / b / r)\n'),
         read(MoveType),
         (
         (MoveType = 'p' -> player_input_move(Side, Board1, X, Y), player_move(Side,Board1,Board2,X,Y),!);
-        (MoveType = 'b' -> player_bide(Side,Pieces), append(Board1,[],Board2),!);
-        (MoveType = 'r' -> ((Pieces1>1)->(player_release(Side, Pieces1, Board1, Board2), !);(write('Not enough pieces to release!\n')), player_input_move_type(Side, Board1, Board2)));
+        (MoveType = 'b' -> (Pieces1<MaxPieces)->(player_bide(Side,Pieces), append(Board1,[],Board2),!);(write('Can\'t bide again!\n'), player_input_move_type(Side, Board1, Board2)));
+        (MoveType = 'r' -> ((Pieces1>1)->(player_release(Side, Pieces1, Board1, Board2),!);(write('Not enough pieces to release!\n'), player_input_move_type(Side, Board1, Board2))));
         (MoveType \= 'p', MoveType \= 'b', MoveType \= 'r') -> (write('Invalid character, please type \'p.\' or \'b.\' or \'r\' \n')), player_input_move_type(Side, Board1, Board2)).
 
 /*reads the position the player wants to place a piece on and calls fucntions to validate if the position is legal*/
@@ -173,7 +195,6 @@ knockback_ramification(Board, HeadAdjX, HeadAdjY, KX, KY, DirX, DirY, NewBoard):
          (KX1 is KX + DirX, KY1 is KY + DirY, knockback_ramification(Board, KX, KY, KX1, KY1, DirX, DirY, Board1))
     ),
     knock_it_back(Board1,HeadAdjX,HeadAdjY,KX,KY,NewBoard).
-
 
 
 knock_it_back(Board,HeadAdjX,HeadAdjY,KX, KY,NewBoard):-

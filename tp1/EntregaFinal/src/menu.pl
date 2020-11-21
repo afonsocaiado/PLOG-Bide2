@@ -36,7 +36,7 @@ getOption :-
     write('Type your choice: ').
 
 optionChosen(1) :-
-    play.
+    play_game.
 
 optionChosen(0) :-
     write('\nGoodbye...\n\n').
