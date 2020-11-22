@@ -115,7 +115,7 @@ iterateRow([H|T]):-
 
 play_game:- 
     player_select_side(Player),
-    final_state(Board),
+    initial(Board),
     (game(Player, Board, 0);
     mainMenu).
 
@@ -147,7 +147,7 @@ player_input_move_type(Side, Board1, Board2):-
 
 /*reads the position the player wants to place a piece on and calls fucntions to validate if the position is legal*/
 player_input_move(Side, Board, XF, YF):- 
-    write('\nChoose where to move: (X-Y)'),
+    write('\nChoose where to move: (Y-X)'),
     read(X-Y),
     (
         (valid_move(X,Y,Board), XF is X, YF is Y);
