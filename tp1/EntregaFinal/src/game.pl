@@ -4,6 +4,7 @@
 /*guardar o número de peças que cada jogador tem guardadas a espera de jogar(com o bide)*/
 /*usar operações como factos i.e.:- place(casa, jogador)  bide(jogador,Npecas)*/
 :-use_module(library(lists)).
+:-use_module(library(between)).
 player(red).
 player(blue).
 other_player(red, blue).
@@ -48,7 +49,21 @@ find_adjacent_cells(Board, X, Y, ListAdjX, ListAdjY):-
     findall(Y1,adjacent(Board,X,Y,X1,Y1),ListAdjY).
 
 /*-------------------------- Basic Game Mechanisms --------------------------------*/
-    
+ 
+gamePC(Side, Board1, Score, ReleaseTag):-
+        score_board(ScoreBoard),
+        other_player(Side, OtherSide),
+        display_game(Board1),
+        game_over(Board1, Score),
+        write('\n'),write(Side), write(' playing!\n'),
+        score_calculation(Board1, ScoreBoard, Score, Score2),
+        write('Score: '), write(Score2), write('\n'),
+        player_input_move_type(Side, Board1, Board2, ReleaseTag, ReleaseTag1),
+        write('\n'), write(Side), write(' moving:\n'),
+        display_game(Board2),
+        game_over(Board2, Score2),
+        write('\n'),write(OtherSide), write(' playing!\n').
+
 game(Side, Board1, Score,ReleaseTag):-
         score_board(ScoreBoard),
         other_player(Side, OtherSide),
@@ -113,10 +128,16 @@ iterateRow([H|T]):-
     (H = 0) -> fail;
     (H \= 0) -> iterateRow(T).
 
-play_game:- 
+play_game(1):- 
     player_select_side(Player),
     initial(Board),
     (game(Player, Board, 0, 0);
+    mainMenu).
+
+play_game(2):-
+    player_select_side(Player),
+    initial(Board),
+    (gamePC(Player, Board, 0, 0);
     mainMenu).
 
 
@@ -163,6 +184,28 @@ player_input_move(Side, Board, XF, YF):-
         (write('\nInvalid position. Retry: '),player_input_move(Side, Board, X1, Y1), XF is X1, YF is Y1)
     ).
 
+/*------------------------------------- CPU ------------------------------------------*/
+possible_moves(Board,MovesList):-
+    findall(X-Y, valid_move(X,Y, Board), MovesList).
+
+best_move([X-Y],ScoreBoard,X,Y,Max):-
+    value_of_y_based_on_x(X,Y,Y1),
+    getCellScore(X,Y1,ScoreBoard,Max).
+best_move([X-Y|T], ScoreBoard, Xf,Yf, Max):-
+        best_move(T, ScoreBoard, Xf1, Yf1, Max1),
+        value_of_y_based_on_x(X,Y,Y1),
+        getCellScore(X,Y1,ScoreBoard,Value),
+        (Value>Max1 -> (Max is Value, Xf is X, Yf is Y); (Max is Max1, Xf is Xf1, Yf is Yf1)).
+
+getCellScore(X,Y,ScoreBoard,Value):-
+    nth1(X,ScoreBoard, Column),
+    nth0(Y, Column, Value).
+
+predictMove(Board, X, Y):-
+    score_board(ScoreBoard),
+    possible_moves(Board, MovesList),
+    best_move(MovesList, ScoreBoard, X, Y, Max).
+
 /*----------------------------- Movement Validations ---------------------------------*/
 
 /*checks if a movement selected by a player is valid*/
@@ -172,10 +215,10 @@ valid_move(X,Y,Board):-
 
 /*checks if the position chosen is inside the board*/
 inside_board(X,Y):-
-        ((X=1; X=9), (Y>3,Y<7));
-        ((X=2; X=8), (Y>2,Y<8));
-        ((X=3; X=7), (Y>1,Y<9));
-        ((X>3, X<7), (Y>0,Y<10)).
+        ((X=1; X=9), between(4,6,Y));
+        ((X=2; X=8), between(3,7,Y));
+        ((X=3; X=7), between(2,8,Y));
+        (between(4,6,X), between(1,9,Y)).
 
 /*checks if the position chosen is empty*/
 pos_is_empty(Board,X,Y,E) :-
