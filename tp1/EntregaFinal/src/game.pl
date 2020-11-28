@@ -62,7 +62,14 @@ gamePC(Side, Board1, Score, ReleaseTag):-
         write('\n'), write(Side), write(' moving:\n'),
         display_game(Board2),
         game_over(Board2, Score2),
-        write('\n'),write(OtherSide), write(' playing!\n').
+        write('\n'),write(OtherSide), write(' playing!\n'),
+        write('\n'),write(OtherSide), write(' playing!\n'),
+        score_calculation(Board2, ScoreBoard, Score2, Score3),
+        game_over(Board2,Score3),
+        write('Score: '), write(Score3), write('\n'),
+        cpuMove(OtherSide, Board2, Board3, ReleaseTag1, ReleaseTag2),
+        write('\n'), write(OtherSide), write(' moving:\n'),
+        gamePC(Side, Board3, Score3, ReleaseTag2).
 
 game(Side, Board1, Score,ReleaseTag):-
         score_board(ScoreBoard),
@@ -80,8 +87,6 @@ game(Side, Board1, Score,ReleaseTag):-
         score_calculation(Board2, ScoreBoard, Score2, Score3),
         game_over(Board2,Score3),
         write('Score: '), write(Score3), write('\n'),
-        %can_move(OtherSide, Board2),
-        %smart_move(OtherSide, Board2, Board3),
         player_input_move_type(OtherSide, Board2, Board3, ReleaseTag1, ReleaseTag2),
         write('\n'), write(OtherSide), write(' moving:\n'),
         game(Side, Board3, Score3, ReleaseTag2).
@@ -162,7 +167,7 @@ player_input_move_type(Side, Board1, Board2, ReleaseTag, ReleaseTag1):-
         write('\nDo you want to play, bide, or release? (p / b / r)\n'),
         read(MoveType),
         (
-            (MoveType = 'p' -> player_input_move(Side, Board1, X, Y), player_move(Side,Board1,Board2,X,Y),!);
+            (MoveType = 'p' -> player_input_move(Side, Board1, X, Y), move(Side,Board1,Board2,X,Y),!);
             (MoveType = 'b' -> ((player_bide(Side,Pieces), append(Board1,[],Board2),!);(write('Can\'t bide again!\n'), player_input_move_type(Side, Board1, Board2,ReleaseTag, ReleaseTag))));
             (MoveType = 'r' -> ((Pieces1>1)->(player_release(Side, Pieces1, Board1, Board2),!);(write('Not enough pieces to release!\n'), player_input_move_type(Side, Board1, Board2,ReleaseTag, ReleaseTag))), ReleaseTag1 is ReleaseTag+1);
             (MoveType \= 'p', MoveType \= 'b', MoveType \= 'r') -> (write('Invalid character, please type \'p.\' or \'b.\' or \'r\' \n')), player_input_move_type(Side, Board1, Board2,ReleaseTag, ReleaseTag)
@@ -173,7 +178,7 @@ player_input_move_type(Side, Board1, Board2, ReleaseTag, ReleaseTag1):-
         Pieces1 is Pieces + 1,
         write('\nYou have '), write(Pieces1), write(' pieces..\n'),
         other_player(Side,OtherSide), write(OtherSide), write(' released so you must release as well!'),nl,
-        (Pieces1>1,(player_release(Side, Pieces1, Board1, Board2),!);(write('Not enough pieces to release!\n'))); (player_input_move(Side, Board1, X, Y), player_move(Side, Board1, Board2, X, Y),!),ReleaseTag1 is ReleaseTag-1.
+        (Pieces1>1,(player_release(Side, Pieces1, Board1, Board2),!);(write('Not enough pieces to release!\n'))); (player_input_move(Side, Board1, X, Y), move(Side, Board1, Board2, X, Y),!),ReleaseTag1 is ReleaseTag-1.
 
 /*reads the position the player wants to place a piece on and calls fucntions to validate if the position is legal*/
 player_input_move(Side, Board, XF, YF):- 
@@ -201,10 +206,11 @@ getCellScore(X,Y,ScoreBoard,Value):-
     nth1(X,ScoreBoard, Column),
     nth0(Y, Column, Value).
 
-predictMove(Board, X, Y):-
+cpuMove(Side,Board, NewBoard, ReleaseTag, ReleaseTag1):-
     score_board(ScoreBoard),
     possible_moves(Board, MovesList),
-    best_move(MovesList, ScoreBoard, X, Y, Max).
+    best_move(MovesList, ScoreBoard, X, Y, _),
+    move(Side,Board,NewBoard,X,Y).
 
 /*----------------------------- Movement Validations ---------------------------------*/
 
@@ -280,7 +286,7 @@ player_release(Side, Pieces, Board, NewBoard):-
     Pieces1 is Pieces - 1,
     player_release(Side, Pieces1, Board, Board1),
     player_input_move(Side, Board1, XF, YF),
-    player_move(Side, Board1, NewBoard, XF, YF),
+    move(Side, Board1, NewBoard, XF, YF),
     display_game(NewBoard).
 
 player_bide(Side, Pieces):-
@@ -288,7 +294,7 @@ player_bide(Side, Pieces):-
     Pieces1 is Pieces + 1,
     assert(playerPieces(Side,Pieces1)).
 
-player_move(Side,Board,NewBoard,X,Y):-
+move(Side,Board,NewBoard,X,Y):-
     place_piece(Side,Board,Board2,X,Y),
     value_of_y_based_on_x(X,Y,Y1),
     find_adjacent_cells(Board2, X, Y1, ListAdjX, ListAdjY),
