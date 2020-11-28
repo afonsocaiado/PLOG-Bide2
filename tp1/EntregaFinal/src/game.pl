@@ -49,7 +49,7 @@ find_adjacent_cells(Board, X, Y, ListAdjX, ListAdjY):-
 
 /*-------------------------- Basic Game Mechanisms --------------------------------*/
     
-game(Side, Board1, Score):-
+game(Side, Board1, Score,ReleaseTag):-
         score_board(ScoreBoard),
         other_player(Side, OtherSide),
         display_game(Board1),
@@ -57,7 +57,7 @@ game(Side, Board1, Score):-
         write('\n'),write(Side), write(' playing!\n'),
         score_calculation(Board1, ScoreBoard, Score, Score2),
         write('Score: '), write(Score2), write('\n'),
-        player_input_move_type(Side, Board1, Board2),
+        player_input_move_type(Side, Board1, Board2, ReleaseTag, ReleaseTag1),
         write('\n'), write(Side), write(' moving:\n'),
         display_game(Board2),
         game_over(Board2, Score2),
@@ -67,9 +67,9 @@ game(Side, Board1, Score):-
         write('Score: '), write(Score3), write('\n'),
         %can_move(OtherSide, Board2),
         %smart_move(OtherSide, Board2, Board3),
-        player_input_move_type(OtherSide, Board2, Board3),
+        player_input_move_type(OtherSide, Board2, Board3, ReleaseTag1, ReleaseTag2),
         write('\n'), write(OtherSide), write(' moving:\n'),
-        game(Side, Board3, Score3).
+        game(Side, Board3, Score3, ReleaseTag2).
 
 score_calculation(Board, ScoreBoard, Score, NewScore):-
     iterateThroughBoard(Board, ScoreBoard, ScoreSide, ScoreOtherSide),
@@ -116,7 +116,7 @@ iterateRow([H|T]):-
 play_game:- 
     player_select_side(Player),
     initial(Board),
-    (game(Player, Board, 0);
+    (game(Player, Board, 0, 0);
     mainMenu).
 
 
@@ -126,13 +126,15 @@ play_game:-
 player_select_side(Player) :-
     write('\nSelect your side (red/blue): '),
     read(Player_Side),
+    
     (
         (player(Player_Side), Player = Player_Side, !);
         (write('\nInvalid side, please type \'red.\' or \'blue.\'\n'), player_select_side(Player))
     ).
 
 /*reads the type of move the player wants to execute and validates it*/
-player_input_move_type(Side, Board1, Board2):-
+player_input_move_type(Side, Board1, Board2, ReleaseTag, ReleaseTag1):-
+        ReleaseTag = 0,
         playerPieces(Side,Pieces),
         Pieces1 is Pieces + 1,
         write('\nYou have '), write(Pieces1), write(' pieces..\n'),
@@ -140,14 +142,21 @@ player_input_move_type(Side, Board1, Board2):-
         read(MoveType),
         (
             (MoveType = 'p' -> player_input_move(Side, Board1, X, Y), player_move(Side,Board1,Board2,X,Y),!);
-            (MoveType = 'b' -> ((player_bide(Side,Pieces), append(Board1,[],Board2),!);(write('Can\'t bide again!\n'), player_input_move_type(Side, Board1, Board2))));
-            (MoveType = 'r' -> ((Pieces1>1)->(player_release(Side, Pieces1, Board1, Board2),!);(write('Not enough pieces to release!\n'), player_input_move_type(Side, Board1, Board2))));
-            (MoveType \= 'p', MoveType \= 'b', MoveType \= 'r') -> (write('Invalid character, please type \'p.\' or \'b.\' or \'r\' \n')), player_input_move_type(Side, Board1, Board2)
+            (MoveType = 'b' -> ((player_bide(Side,Pieces), append(Board1,[],Board2),!);(write('Can\'t bide again!\n'), player_input_move_type(Side, Board1, Board2,ReleaseTag, ReleaseTag))));
+            (MoveType = 'r' -> ((Pieces1>1)->(player_release(Side, Pieces1, Board1, Board2),!);(write('Not enough pieces to release!\n'), player_input_move_type(Side, Board1, Board2,ReleaseTag, ReleaseTag))), ReleaseTag1 is ReleaseTag+1);
+            (MoveType \= 'p', MoveType \= 'b', MoveType \= 'r') -> (write('Invalid character, please type \'p.\' or \'b.\' or \'r\' \n')), player_input_move_type(Side, Board1, Board2,ReleaseTag, ReleaseTag)
         ).
+player_input_move_type(Side, Board1, Board2, ReleaseTag, ReleaseTag1):-
+        ReleaseTag = 1,
+        playerPieces(Side,Pieces),
+        Pieces1 is Pieces + 1,
+        write('\nYou have '), write(Pieces1), write(' pieces..\n'),
+        other_player(Side,OtherSide), write(OtherSide), write(' released so you must release as well!'),nl,
+        (Pieces1>1,(player_release(Side, Pieces1, Board1, Board2),!);(write('Not enough pieces to release!\n'))); (player_input_move(Side, Board1, X, Y), player_move(Side, Board1, Board2, X, Y),!),ReleaseTag1 is ReleaseTag-1.
 
 /*reads the position the player wants to place a piece on and calls fucntions to validate if the position is legal*/
 player_input_move(Side, Board, XF, YF):- 
-    write('\nChoose where to move: (Y-X)'),
+    write('\nChoose where to move: (X-Y)'),
     read(X-Y),
     (
         (valid_move(X,Y,Board), XF is X, YF is Y);
