@@ -40,7 +40,8 @@ optionChosen(2):-
     play_game(2).
 
 optionChosen(0) :-
-    write('\nGoodbye...\n\n').
+    write('\nGoodbye...\n\n'),
+    break.
 
 optionChosen(_Other) :-
     write('\nInvalid choice! Try again please.\n\n'),

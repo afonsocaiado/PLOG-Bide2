@@ -54,44 +54,45 @@ gamePC(Side, Board1, Score, ReleaseTag):-
         score_board(ScoreBoard),
         other_player(Side, OtherSide),
         display_game(Board1),
-        game_over(Board1, Score),
         write('\n'),write(Side), write(' playing!\n'),
-        score_calculation(Board1, ScoreBoard, Score, Score2),
-        write('Score: '), write(Score2), write('\n'),
+        write('Score: '), write(Score), write('\n'),
         player_input_move_type(Side, Board1, Board2, ReleaseTag, ReleaseTag1),
         write('\n'), write(Side), write(' moving:\n'),
         display_game(Board2),
-        game_over(Board2, Score2),
+        score_calculation(Board2, ScoreBoard, Score1),
+        game_over(Board2, GO),
+        (GO = 1 -> (announceResult(Score1), mainMenu); write('$')),
         write('\n'),write(OtherSide), write(' playing!\n'),
-        write('\n'),write(OtherSide), write(' playing!\n'),
-        score_calculation(Board2, ScoreBoard, Score2, Score3),
-        game_over(Board2,Score3),
-        write('Score: '), write(Score3), write('\n'),
+        write('Score: '), write(Score1), write('\n'),
         cpuMove(OtherSide, Board2, Board3, ReleaseTag1, ReleaseTag2),
         write('\n'), write(OtherSide), write(' moving:\n'),
-        gamePC(Side, Board3, Score3, ReleaseTag2).
+        score_calculation(Board3, ScoreBoard, Score2),
+        game_over(Board3, GO1),
+        (GO1 = 1 -> (announceResult(Score2), mainMenu); write('$')),
+        gamePC(Side, Board3, Score2, ReleaseTag2).
 
 game(Side, Board1, Score,ReleaseTag):-
         score_board(ScoreBoard),
         other_player(Side, OtherSide),
         display_game(Board1),
-        game_over(Board1, Score),
         write('\n'),write(Side), write(' playing!\n'),
-        score_calculation(Board1, ScoreBoard, Score, Score2),
-        write('Score: '), write(Score2), write('\n'),
+        write('Score: '), write(Score), write('\n'),
         player_input_move_type(Side, Board1, Board2, ReleaseTag, ReleaseTag1),
         write('\n'), write(Side), write(' moving:\n'),
         display_game(Board2),
-        game_over(Board2, Score2),
+        score_calculation(Board2, ScoreBoard, Score1),
+        game_over(Board2, GO),
+        (GO = 1 -> (announceResult(Score1), mainMenu); write('$')),
         write('\n'),write(OtherSide), write(' playing!\n'),
-        score_calculation(Board2, ScoreBoard, Score2, Score3),
-        game_over(Board2,Score3),
-        write('Score: '), write(Score3), write('\n'),
+        write('Score: '), write(Score1), write('\n'),
         player_input_move_type(OtherSide, Board2, Board3, ReleaseTag1, ReleaseTag2),
         write('\n'), write(OtherSide), write(' moving:\n'),
-        game(Side, Board3, Score3, ReleaseTag2).
+        score_calculation(Board3, ScoreBoard, Score2),
+        game_over(Board3, GO1),
+        (GO1 = 1 -> (announceResult(Score2), mainMenu); write('$')),
+        gamePC(Side, Board3, Score2, ReleaseTag2).
 
-score_calculation(Board, ScoreBoard, Score, NewScore):-
+score_calculation(Board, ScoreBoard, NewScore):-
     iterateThroughBoard(Board, ScoreBoard, ScoreSide, ScoreOtherSide),
     NewScore is (ScoreSide - ScoreOtherSide).
 
@@ -120,28 +121,31 @@ announceResult(Score):-
     Score=0 -> write('\nIt\'s a draw!!!')
     ).
 
-game_over(Board, Score):-
-    iterate(Board)-> announceResult(Score),fail; write('').
+game_over(Board, GO):-
+    iterate(Board, Val),
+    (Val=1, GO is 0);
+    (Val=0, GO is 1).
 
-iterate([]).
-iterate([H|T]):-
-    iterateRow(H),
-    iterate(T).
+iterate([],0).
+iterate([H|T],Val):-
+    iterateRow(H,ValR),
+    (ValR = 0 )-> (iterate(T, Val1), Val is Val1);
+    (ValR = 1 )-> (Val is ValR).
 
-iterateRow([]).
-iterateRow([H|T]):-
-    (H = 0) -> fail;
-    (H \= 0) -> iterateRow(T).
+iterateRow([], 0).
+iterateRow([H|T], Val):-
+    (H = 0) -> Val is 1;
+    (H \= 0) -> (iterateRow(T,Val1),Val is Val1).
 
 play_game(1):- 
     player_select_side(Player),
-    initial(Board),
+    final_state(Board),
     (game(Player, Board, 0, 0);
     mainMenu).
 
 play_game(2):-
     player_select_side(Player),
-    initial(Board),
+    final_state(Board),
     (gamePC(Player, Board, 0, 0);
     mainMenu).
 
