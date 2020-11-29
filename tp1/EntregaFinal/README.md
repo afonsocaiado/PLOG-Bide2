@@ -62,7 +62,7 @@ Em caso de empate, remover os discos posicionados mais perto das bordas, e recon
 
 # Lógica do Jogo
 
-## **- Representação do Estado de Jogo**
+## **- Representação do Estado de Jogo** - [board.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/board.pl)
 
 ### **Situação initial**: 
 ```
@@ -195,7 +195,7 @@ mainMenu :-
 - ```getOption``` pede ao utilizador para fazer input da opção do menu que pretende escolher.
 -  O predicado ```optionChosen``` efetua o tratamento do input vindo do utilizador, redirecionando o jogador para o que este deseja.
 
-## **- Jogadas Válidas** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/game.pl)
+## **- Jogadas Válidas** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/3b467ac5031de2b7404c019974d2a81dee5fd1dc/tp1/EntregaFinal/src/game.pl#L219-L238)
 
 Para obter a lista de possíveis jogadas dado o estado atual do tabuleiro, implementamos o predicado ```valid_moves(Board,MovesList)```. Este predicado retorna em MovesList uma lista de jogadas válidas que o CPU pode efetuar, sob a forma ```X-Y```, tendo em conta o atual ```Board```.
 
@@ -203,7 +203,7 @@ Este último predicado faz uso do predicado ```valid_move(X,Y,Board)```, predica
 
 Para a posição estar disponível e o predicado suceder, primeiro verificamos se essa mesma posição é efetivamente uma posição existente no tabuleiro base, com o predicado ```inside_board(X,Y)``` e, de seguida, verificamos se essa posição não estará já ocupada por outra peça, com ```pos_is_empty(Board,X,Y,E)```. Este predicado sucede se para o ```Board``` atual a posição ```X-Y``` estiver vazia.
 
-## **- Execução de Jogadas** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/game.pl)
+## **- Execução de Jogadas** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/3b467ac5031de2b7404c019974d2a81dee5fd1dc/tp1/EntregaFinal/src/game.pl#L283-L328)
 
 Para um jogador ser capaz de efetuar uma jogada normal, implementamos o predicado ```move(Side,Board,NewBoard,X,Y)```, da seguinta forma:
 
@@ -225,8 +225,8 @@ Quando o jogador efetua um **release**, o predicado ```player_release(Side, Piec
 ## **- Final do Jogo** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/game.pl)
 
 Para verificar se o jogo terminou, utilizamos o predicado ```game_over(Board, GO)``` que itera o tabuleiro ```Board```. se após iterar o tabuleiro atual, chegar à conclusão que todas as posições estão ocupadas, ou seja, que o jogo terminou, o parametro ```GO``` toma o valor 1, 0 se não for o caso. 
-Quando ```GO``` é 1, é chamado o predicado ```announceResult(Score)``` que dado um ```Score``` anteriormente obtido com o predicado ```value(Board, ScoreBoard, NewScore)``` (```NewScore```). É então anunciado o vencedor e a diferença de pontos pela que este venceu. Finalmente, após declarar o vencedor da partida, o jogo retorna ao Menu Principal ```mainMenu``.
-Quando ```GO```é 0, o jogo continua, pois ainda há posições vazias.
+Quando ```GO``` é 1, é chamado o predicado ```announceResult(Score)``` que dado um ```Score``` anteriormente obtido com o predicado ```value(Board, ScoreBoard, NewScore)``` (```NewScore```). É então anunciado o vencedor e a diferença de pontos pela que este venceu. Finalmente, após declarar o vencedor da partida, o jogo retorna ao Menu Principal ```mainMenu```.
+Quando ```GO``` é 0, o jogo continua, pois ainda há posições vazias.
 
 ## **- Avaliação do Tabuleiro** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/game.pl)
 
