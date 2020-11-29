@@ -222,13 +222,13 @@ Como viste anteriormente, no Bide é tambem possível efetuar jogadas **release*
 Quando o jogador efetua um **bide**, o predicado ```player_bide(Side, Pieces)``` acrescenta 1 ao numero de peças existentes (```playerPieces```) para o jogador ```Side```.
 Quando o jogador efetua um **release**, o predicado ```player_release(Side, Pieces, Board, NewBoard)``` implementa recursividade para posicionar todas as peças ```Pieces``` que este jogador tem disponíveis, naturalmente, utilizando o predicado anteriormente descrito, ```move(Side,Board,NewBoard,X,Y)```.
 
-## **- Final do Jogo** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/game.pl)
+## **- Final do Jogo** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/b64c7fec48c28ac1e67059ab32c9fd0d4cc20a2b/tp1/EntregaFinal/src/game.pl#L117-L138)
 
 Para verificar se o jogo terminou, utilizamos o predicado ```game_over(Board, GO)``` que itera o tabuleiro ```Board```. se após iterar o tabuleiro atual, chegar à conclusão que todas as posições estão ocupadas, ou seja, que o jogo terminou, o parametro ```GO``` toma o valor 1, 0 se não for o caso. 
 Quando ```GO``` é 1, é chamado o predicado ```announceResult(Score)``` que dado um ```Score``` anteriormente obtido com o predicado ```value(Board, ScoreBoard, NewScore)``` (```NewScore```). É então anunciado o vencedor e a diferença de pontos pela que este venceu. Finalmente, após declarar o vencedor da partida, o jogo retorna ao Menu Principal ```mainMenu```.
 Quando ```GO``` é 0, o jogo continua, pois ainda há posições vazias.
 
-## **- Avaliação do Tabuleiro** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/game.pl)
+## **- Avaliação do Tabuleiro** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/b64c7fec48c28ac1e67059ab32c9fd0d4cc20a2b/tp1/EntregaFinal/src/game.pl#L74-L115)
 
 Para avaliar o atual estado do jogo, a cada jogada, no predicado principal ```game/4```, é chamado um predicado ```value(Board, ScoreBoard, NewScore)```:
 
@@ -240,7 +240,7 @@ score_calculation(Board, ScoreBoard, NewScore):-
 
 Este preidcado, tendo em conta ```ScoreBoard``` (lista de listas com a pontuação de cada posição do tabuleiro) e o estado atual da ```Board```, itera pelo tabuleiro com o predicado ```iterateThroughBoard/4``` e retorna em ```NewScore``` a pontuação com que ficaria o jogador que acabou de efetuar a sua jogada, se o jogo terminasse nesse momento.
 
-## **- Jogada do Computador** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/game.pl)
+## **- Jogada do Computador** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/b64c7fec48c28ac1e67059ab32c9fd0d4cc20a2b/tp1/EntregaFinal/src/game.pl#L196-L217)
 
 O principal predicado responsável pela escolha da jogada a efetuar pelo computador é o predicado ```cpuMove/5```, implementado da seguinte forma:
 
