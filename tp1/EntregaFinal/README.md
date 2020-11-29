@@ -192,14 +192,60 @@ Para a posição estar disponível e o predicado suceder, primeiro verificamos s
 
 ## **- Execução de Jogadas** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/game.pl)
 
-## - Execução de Jogadas
+Para um jogador ser capaz de efetuar uma jogada normal, implementamos o predicado ```move(Side,Board,NewBoard,X,Y)```, da seguinta forma:
 
-## - Final do Jogo
+```
+move(Side,Board,NewBoard,X,Y):-
+    place_piece(Side,Board,Board2,X,Y),
+    value_of_y_based_on_x(X,Y,Y1),
+    find_adjacent_cells(Board2, X, Y1, ListAdjX, ListAdjY),
+    move_adjacent_cells(Board2, X, Y, ListAdjX, ListAdjY, NewBoard).
+```
+O predicado ```place_piece(Side,Board,NewBoard,X,Y)``` é responsável por colocar a peça ```X-Y``` no respetivo local ao adicionar esta nova peça a uma lista de peças presentes no tabuleiro atual, para depois chamar o predicado ```replace_list_in_board``` que atualiza essa mesma lista do tabuleiro.
 
-## - Avaliação do Tabuleiro
+No Bide, quando uma nova peça é posicionada no tabuleiro, as peças adjacentes a esta devem ser reposicionadas (quando possível). Para tal, implementamos os dois predicados ```find_adjacent_cells(Board, X, Y, ListAdjX, ListAdjY)``` e ```move_adjacent_cells(Board, X, Y, ListAdjX, ListAdjY, NewBoard)```. Como o nomes indica, o primeiro predicado é responsável por criar duas listas ```ListAdjX```e ```ListAdjY``` que contêm uma lista das coordenadas de todas as peças presentes em ```Board``` que são adjacentes à nova peça posicionada em ```X-Y```. Por outro lado, ```move_adjacent_cells```, obtendo estas novas listas de peças adjacentes, ocupa-se em movimentá-las todas para as suas novas posições, com a ajuda do predicado ```knockback_move(Board, X, Y,[HeadAdjX|TailAdjX], [HeadAdjY|TailAdjY], NewBoard)```.
 
-## - Jogada do Computador
+Como viste anteriormente, no Bide é tambem possível efetuar jogadas **release** e jogadas **bide**. 
+Quando o jogador efetua um **bide**, o predicado ```player_bide(Side, Pieces)``` acrescenta 1 ao numero de peças existentes (```playerPieces```) para o jogador ```Side```.
+Quando o jogador efetua um **release**, o predicado ```player_release(Side, Pieces, Board, NewBoard)``` implementa recursividade para posicionar todas as peças ```Pieces``` que este jogador tem disponíveis, naturalmente, utilizando o predicado anteriormente descrito, ```move(Side,Board,NewBoard,X,Y)```.
+
+## **- Final do Jogo** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/game.pl)
+
+Para verificar se o jogo terminou, utilizamos o predicado ```game_over(Board, GO)``` que itera o tabuleiro ```Board```. se após iterar o tabuleiro atual, chegar à conclusão que todas as posições estão ocupadas, ou seja, que o jogo terminou, o parametro ```GO``` toma o valor 1, 0 se não for o caso. 
+Quando ```GO``` é 1, é chamado o predicado ```announceResult(Score)``` que dado um ```Score``` anteriormente obtido com o predicado ```score_calculation(Board, ScoreBoard, NewScore)``` (```NewScore```). É então anunciado o vencedor e a diferença de pontos pela que este venceu. Finalmente, após declarar o vencedor da partida, o jogo retorna ao Menu Principal ```mainMenu``.
+Quando ```GO```é 0, o jogo continua, pois ainda há posições vazias.
+
+## **- Avaliação do Tabuleiro** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/game.pl)
+
+## **- Jogada do Computador** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/game.pl)
+
+O principal predicado responsável pela escolha da jogada a efetuar pelo computador é o predicado ```cpuMove/5```, implementado da seguinte forma:
+
+```
+cpuMove(Side,Board, NewBoard, ReleaseTag, ReleaseTag1):-
+    score_board(ScoreBoard),
+    valid_moves(Board, MovesList),
+    best_move(MovesList, ScoreBoard, X, Y, _),
+    move(Side,Board,NewBoard,X,Y).
+```
+
+Este predicado faz uso de vários predicados anteriormente descritos, tais como ```valid_moves/2``` e ```move/5```. Em adição, é utilizado o predicado ```score_board/1``` que tem em ```ScoreBoard``` uma lista de listas com a pontuação de cada posição do tabuleiro.
+
+O predicado ```best_move([X-Y|T], ScoreBoard, Xf,Yf, Max)```, graças a ```getCellScore(X,Y,ScoreBoard,Value)``` obtém a pontuação de uma posição ```X-Y```. Ao percorrer ```MovesList``` (lista com todas as possiveis jogadas, obtida com o predicado ```valid_moves/2```), o predicado ```best_move``` vai atualizando a pontuação máxima que o computador pode atingir se posicionar a peça numa certa posição. De seguida, após terminar de percorer a lista, atribui as coordenadas da posição de pontuação mais elevada disponível aos parâmetros X e Y do predicado.
+
+Finalmente, o computador posiciona a peça na posição obtida, com ```move/5``` como visto. 
 
 # Conclusões
 
+À partida, sendo prolog uma liguagem nova e sobretudo diferente, o começo do trabalho contou com algumas dúvidas e dificuldades. Mas, à medida que nos acostumamos à linguagem, o conhecimento sobre esta última não parou de crescer com a implementação do trabalho, e conseguimos assim avançar rapidamente com o nosso jogo.
+
+Acreditamos não encontrar erros ou bugs na nossa implementação e no nosso jogo, mas estamos abertos a sugestões!
+
+Por outro lado, em relação a possíveis melhoramentos, poderíamos eventualmente acrescenter diferentes dificuldades / níveis para os jogos contra o computador. Não só considerando a pontuação da posição onde vai colocar a peça, mas tendo também em consideração a pontuação para onde vão ser deslocadas as peças adjacentes.
+
 # Bibliografia
+
+- Slides disponíveis no moodle;
+- [Nestor Games](https://nestorgames.com/#bide_detail)
+- [Documentação SICTUS](https://sicstus.sics.se/sicstus/docs/latest4/html/sicstus.html/)
+- [Documentação SWI](https://www.swi-prolog.org/pldoc/doc_for?object=manual)
