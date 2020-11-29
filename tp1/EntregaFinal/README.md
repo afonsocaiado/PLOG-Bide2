@@ -225,10 +225,12 @@ Quando o jogador efetua um **release**, o predicado ```player_release(Side, Piec
 ## **- Final do Jogo** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/game.pl)
 
 Para verificar se o jogo terminou, utilizamos o predicado ```game_over(Board, GO)``` que itera o tabuleiro ```Board```. se após iterar o tabuleiro atual, chegar à conclusão que todas as posições estão ocupadas, ou seja, que o jogo terminou, o parametro ```GO``` toma o valor 1, 0 se não for o caso. 
-Quando ```GO``` é 1, é chamado o predicado ```announceResult(Score)``` que dado um ```Score``` anteriormente obtido com o predicado ```score_calculation(Board, ScoreBoard, NewScore)``` (```NewScore```). É então anunciado o vencedor e a diferença de pontos pela que este venceu. Finalmente, após declarar o vencedor da partida, o jogo retorna ao Menu Principal ```mainMenu``.
+Quando ```GO``` é 1, é chamado o predicado ```announceResult(Score)``` que dado um ```Score``` anteriormente obtido com o predicado ```value(Board, ScoreBoard, NewScore)``` (```NewScore```). É então anunciado o vencedor e a diferença de pontos pela que este venceu. Finalmente, após declarar o vencedor da partida, o jogo retorna ao Menu Principal ```mainMenu``.
 Quando ```GO```é 0, o jogo continua, pois ainda há posições vazias.
 
 ## **- Avaliação do Tabuleiro** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/game.pl)
+
+Para avaliar o atual estado do jogo, a cada jogada, no predicado principal ```game/4```, é chamado um predicado ```value(Board, ScoreBoard, NewScore)``` que, tendo em conta ```ScoreBoard``` (lista de listas com a pontuação de cada posição do tabuleiro) e o estado atual da ```Board```, retorna em ```NewScore``` a pontuação com que ficaria o jogador que acabou de efetuar a sua jogada, se o jogo terminasse nesse momento.
 
 ## **- Jogada do Computador** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/game.pl)
 
