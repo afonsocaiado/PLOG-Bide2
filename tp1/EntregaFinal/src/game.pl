@@ -59,14 +59,14 @@ gamePC(Side, Board1, Score, ReleaseTag):-
         player_input_move_type(Side, Board1, Board2, ReleaseTag, ReleaseTag1),
         write('\n'), write(Side), write(' moving:\n'),
         display_game(Board2),
-        score_calculation(Board2, ScoreBoard, Score1),
+        value(Board2, ScoreBoard, Score1),
         game_over(Board2, GO),
         (GO = 1 -> (announceResult(Score1), mainMenu); write('$')),
         write('\n'),write(OtherSide), write(' playing!\n'),
         write('Score: '), write(Score1), write('\n'),
         cpuMove(OtherSide, Board2, Board3, ReleaseTag1, ReleaseTag2),
         write('\n'), write(OtherSide), write(' moving:\n'),
-        score_calculation(Board3, ScoreBoard, Score2),
+        value(Board3, ScoreBoard, Score2),
         game_over(Board3, GO1),
         (GO1 = 1 -> (announceResult(Score2), mainMenu); write('$')),
         gamePC(Side, Board3, Score2, ReleaseTag2).
@@ -80,19 +80,19 @@ game(Side, Board1, Score,ReleaseTag):-
         player_input_move_type(Side, Board1, Board2, ReleaseTag, ReleaseTag1),
         write('\n'), write(Side), write(' moving:\n'),
         display_game(Board2),
-        score_calculation(Board2, ScoreBoard, Score1),
+        value(Board2, ScoreBoard, Score1),
         game_over(Board2, GO),
         (GO = 1 -> (announceResult(Score1), mainMenu); write('$')),
         write('\n'),write(OtherSide), write(' playing!\n'),
         write('Score: '), write(Score1), write('\n'),
         player_input_move_type(OtherSide, Board2, Board3, ReleaseTag1, ReleaseTag2),
         write('\n'), write(OtherSide), write(' moving:\n'),
-        score_calculation(Board3, ScoreBoard, Score2),
+        value(Board3, ScoreBoard, Score2),
         game_over(Board3, GO1),
         (GO1 = 1 -> (announceResult(Score2), mainMenu); write('$')),
         gamePC(Side, Board3, Score2, ReleaseTag2).
 
-score_calculation(Board, ScoreBoard, NewScore):-
+value(Board, ScoreBoard, NewScore):-
     iterateThroughBoard(Board, ScoreBoard, ScoreSide, ScoreOtherSide),
     NewScore is (ScoreSide - ScoreOtherSide).
 
