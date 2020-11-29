@@ -194,7 +194,7 @@ player_input_move(Side, Board, XF, YF):-
     ).
 
 /*------------------------------------- CPU ------------------------------------------*/
-possible_moves(Board,MovesList):-
+valid_moves(Board,MovesList):-
     findall(X-Y, valid_move(X,Y, Board), MovesList).
 
 best_move([X-Y],ScoreBoard,X,Y,Max):-
@@ -212,7 +212,7 @@ getCellScore(X,Y,ScoreBoard,Value):-
 
 cpuMove(Side,Board, NewBoard, ReleaseTag, ReleaseTag1):-
     score_board(ScoreBoard),
-    possible_moves(Board, MovesList),
+    valid_moves(Board, MovesList),
     best_move(MovesList, ScoreBoard, X, Y, _),
     move(Side,Board,NewBoard,X,Y).
 
