@@ -230,7 +230,15 @@ Quando ```GO```é 0, o jogo continua, pois ainda há posições vazias.
 
 ## **- Avaliação do Tabuleiro** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/game.pl)
 
-Para avaliar o atual estado do jogo, a cada jogada, no predicado principal ```game/4```, é chamado um predicado ```value(Board, ScoreBoard, NewScore)``` que, tendo em conta ```ScoreBoard``` (lista de listas com a pontuação de cada posição do tabuleiro) e o estado atual da ```Board```, retorna em ```NewScore``` a pontuação com que ficaria o jogador que acabou de efetuar a sua jogada, se o jogo terminasse nesse momento.
+Para avaliar o atual estado do jogo, a cada jogada, no predicado principal ```game/4```, é chamado um predicado ```value(Board, ScoreBoard, NewScore)```:
+
+```
+score_calculation(Board, ScoreBoard, NewScore):-
+    iterateThroughBoard(Board, ScoreBoard, ScoreSide, ScoreOtherSide),
+    NewScore is (ScoreSide - ScoreOtherSide).
+```
+
+Este preidcado, tendo em conta ```ScoreBoard``` (lista de listas com a pontuação de cada posição do tabuleiro) e o estado atual da ```Board```, itera pelo tabuleiro com o predicado ```iterateThroughBoard/4``` e retorna em ```NewScore``` a pontuação com que ficaria o jogador que acabou de efetuar a sua jogada, se o jogo terminasse nesse momento.
 
 ## **- Jogada do Computador** - [game.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/game.pl)
 
