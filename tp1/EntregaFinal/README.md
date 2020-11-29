@@ -1,10 +1,22 @@
-# Bide_2 PLOG 2020/2021
+# PLOG 2020/2021 - TP1
+
+# Grupo: Bide_2
 
 <img src="imagens/imagemJogo.jpg" width="576" height="432">
 
 Trabalho realizado pelos aluno da turma 2 e 1 (respetivamente) de PLOG: 
 - Afonso Maria Rebordão Caiado de Sousa (up201806789)
 - Vasco Marques Lopes Teixeira (up201802112)
+
+# Instalação e Execução
+
+Para jogar o nosso jogo, executar os seguintes passos:
+
+- Previamente instalar SICStus Prolog;
+- Correr o sicstus na diretória onde este foi instalado com ```$ ./sicstus``` ;
+- ```$ consult('diretorio\ate\bide.pl').``` ;
+- **Alternativa:** File > Working Directory e selecionar a pasta src descarregada. File > Consult e selecionar o ficheiro [bide.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/bide.pl);
+- Escrever ```play.``` no SICStus e o jogo começa.
 
 # O Jogo Bide
 
@@ -47,8 +59,6 @@ Em caso de empate, remover os discos posicionados mais perto das bordas, e recon
 ![Contagem de pontos](imagens/explicacaoJogada.png)
 
 ##### **source: https://nestorgames.com/#bide_detail**
-
-# Instalação e Execução
 
 # Lógica do Jogo
 
@@ -107,7 +117,7 @@ final_state(Board):-
 
 ## **- Visualização do Estado de Jogo**
 
-### **Tabuleiro** - [board.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/bide.pl)
+### **Tabuleiro** - [board.pl](https://github.com/afonsocaiado/PLOG-Bide2/blob/main/tp1/EntregaFinal/src/board.pl)
 
 Para podermos visualizar o tabuleiro na consola, utilizamos o seguinte código:
 

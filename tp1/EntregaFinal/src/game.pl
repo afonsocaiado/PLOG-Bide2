@@ -139,13 +139,13 @@ iterateRow([H|T], Val):-
 
 play_game(1):- 
     player_select_side(Player),
-    final_state(Board),
+    initial(Board),
     (game(Player, Board, 0, 0);
     mainMenu).
 
 play_game(2):-
     player_select_side(Player),
-    final_state(Board),
+    initial(Board),
     (gamePC(Player, Board, 0, 0);
     mainMenu).
 
