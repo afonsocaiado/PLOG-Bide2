@@ -56,7 +56,7 @@ Quando o tabuleiro está cheio, os jogadores contam as pontuações.
 Cada disco vale o número de pontos equivalente à sua distância da borda mais próxima (começando por zero). O jogador que tenha o **Grupo** com a pontuação mais elevada, ganha.
 Em caso de empate, remover os discos posicionados mais perto das bordas, e recontar, até haver um vencedor. 
 
-![Contagem de pontos](imagens/explicacaoJogada.png)
+<img src="imagens/explicacaoJogada.png" width="625" height="352">
 
 ##### **source: https://nestorgames.com/#bide_detail**
 
@@ -101,16 +101,19 @@ intermediate_state(Board):-
 ### **Situação final**: 
 ```
 final_state(Board):-
-		nl, 
-		Board = [[1,1,2],
-			  [1,2,2,1,2],
-			  [1,1,2,2,2,1,1],
-			  [1,2,2,2,1,1,1,1,2],
-			  [1,2,1,1,2,1,1,1,2],
-			  [1,2,2,2,2,1,1,2,1],
-			  [1,2,1,2,1,1,2],
-			  [2,2,2,1,2],
-			  [2,2,1]].
+    Board = [[1,1,2],
+            [1,2,2,1,2], 
+         	[1,1,2,2,2,1,1],  
+         	[1,2,2,2,1,1,1,1,2], 
+         	[1,2,1,0,2,0,1,1,2],
+            [1,2,2,2,0,1,1,2,1],
+            [1,2,1,2,1,1,2],
+            [2,2,2,1,2], 
+            [2,2,1]],
+            assert(playerPieces(blue,0)),
+            assert(playerPieces(red,0)),
+            assert(playerMaxPieces(blue,29)),
+            assert(playerMaxPieces(red,29)).
 ```
 
 <img src="imagens/tabuleiroFinal.png" width="281" height="291">
