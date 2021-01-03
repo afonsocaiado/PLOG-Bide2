@@ -1,3 +1,4 @@
+
 :-use_module(library(clpfd)).
 :-use_module(library(lists)).
 
@@ -5,7 +6,7 @@ main:-
     baker([85, 98, 60, 70], [[0, 3, 14, 1], [15, 0, 10, 25], [14, 10, 0, 3], [1, 25, 3, 0]], [10, 5, 20, 15]).
 
 baker(PreferedTime, HouseTravelTime, BakeryTravelTime):-
-
+    
     printProblem(PreferedTime, HouseTravelTime, BakeryTravelTime),
 
     getLengths(PreferedTime,Route,DeliveryInstants,NumberOfHouses),
@@ -17,15 +18,18 @@ baker(PreferedTime, HouseTravelTime, BakeryTravelTime):-
     restriction1(Route,DeliveryInstants),
 
     restriction2(Route,BakeryTravelTime,DeliveryInstants),
-    
+
     restriction3(HouseTravelTime,TravelTimeList,PreferedTime, DeliveryInstants, Delay, NumberOfHouses,Delay,Route),
-    
+
     restriction4(NumberOfHouses,Route,BakeryTravelTime,DeliveryInstants,Time),
 
-    labeling([minimize(Time)], Route),
+    evaluateRoute(Time, Delay, Score),
 
-    printSolution(Time,Delay,Route)
+    labeling([minimize(Score)], Route),
+
+    printSolution(Route, DeliveryInstants)
 .
+
 
 printProblem(PreferedTime, HouseTravelTime, BakeryTravelTime):-
     write('PreferedTime = '),
@@ -80,9 +84,11 @@ getRouteTime([PrevHouse, House], TravelTimeList, PreferedTime, [PrevHouseTime, H
     Position #= (PrevHouse - 1) * NumberOfHouses + House,
     element(Position, TravelTimeList, HouseTravelTime),
     HouseTime #= (PrevHouseTime + 5) + HouseTravelTime,
+
     % Get Delay
     element(House, PreferedTime, DeliveryTime),
-    Delay #= HouseTime - DeliveryTime
+    SignedDelay #= HouseTime - DeliveryTime - 40,
+    convertDelay(SignedDelay, Delay)
 .
 
 getRouteTime([PrevHouse, House|Rest], TravelTimeList, PreferedTime, [PrevHouseTime, HouseTime | RestTime], Delay, NumberOfHouses):- 
@@ -93,15 +99,55 @@ getRouteTime([PrevHouse, House|Rest], TravelTimeList, PreferedTime, [PrevHouseTi
 
     % Get Delay
     element(House, PreferedTime, DeliveryTime),
-    Delay #= HouseTime - DeliveryTime + NewDelay,
+    SignedDelay #= HouseTime - DeliveryTime - 40,
+    convertDelay(SignedDelay, UnsignedDelay),
+    Delay #= UnsignedDelay + NewDelay,
 
     getRouteTime([House|Rest], TravelTimeList, PreferedTime, [HouseTime | RestTime], NewDelay, NumberOfHouses)
 .
 
-printSolution(Time,Delay,Route):-
+evaluateRoute(Time, Delay, Score):-
+    Score #= Time + Delay
+.
+
+convertDelay(SignedDelay, UnsignedDelay):-
+    SignedDelay #< 0,
+    UnsignedDelay #= SignedDelay * -1
+.
+
+convertDelay(SignedDelay, SignedDelay).
+
+printSolution([], []).
+printSolution(Route, DeliveryInstants):-
+    write('\n  Route  \n'),
+    displayRoute(Route),
+    displayHeader,
+    displayTableContent(Route, DeliveryInstants)
+.
+
+displayHeader:-
+    nl,
+    write('House  Instants'),
+    nl
+.
+
+displayRoute([House|[]]):-
+    write(House),
+    nl
+.
+
+displayRoute([House|Rest]):- 
+    write(House),
+    write(' ---> '),
+    displayRoute(Rest)
+.
+
+displayTableContent([],[]).
+displayTableContent([House|Rest], [Time|RestTime]):-
+    write('   '),
+    write(House),
+    write(' --> '),
     write(Time),
-    write('<-->'),
-    write(Delay),
-    write('<-->'),
-    write(Route)
+    nl,
+    displayTableContent(Rest, RestTime)
 .
