@@ -60,9 +60,9 @@ restriction1(Caminho,MomentoEntrega):-
 .
 
 restriction2(Caminho,TempoPadariaCasas,MomentoEntrega):-
-    element(1, Caminho, FirstHouseID),
-    element(FirstHouseID, TempoPadariaCasas, BakeryToHouseTime),
-    element(1, MomentoEntrega, BakeryToHouseTime)
+    element(1, Caminho, IDPrimeiraCasa),
+    element(IDPrimeiraCasa, TempoPadariaCasas, TempoPadariaPrimeira),
+    element(1, MomentoEntrega, TempoPadariaPrimeira)
 .
 
 restriction3(TempoEntreCasas,ListaTemposViagem,HorarioPreferido, MomentoEntrega, Atraso, NumeroCasas, Caminho):-
@@ -71,48 +71,48 @@ restriction3(TempoEntreCasas,ListaTemposViagem,HorarioPreferido, MomentoEntrega,
 .
 
 restriction4(NumeroCasas,Caminho,TempoPadariaCasas,MomentoEntrega,TempoTotal):-
-    element(NumeroCasas, Caminho, LastHouseID),
-    element(LastHouseID, TempoPadariaCasas, HouseToBakeryTime),
-    element(NumeroCasas, MomentoEntrega, LastInstant),
-    TempoTotal #= LastInstant + HouseToBakeryTime
+    element(NumeroCasas, Caminho, IDUltimaCasa),
+    element(IDUltimaCasa, TempoPadariaCasas, TempoUltimaPadaria),
+    element(NumeroCasas, MomentoEntrega, UltimoMomento),
+    TempoTotal #= UltimoMomento + TempoUltimaPadaria
 .
 
-getRouteTime([PrevHouse, House], ListaTemposViagem, HorarioPreferido, [PrevHouseTime, HouseTime], Atraso, NumeroCasas):-
-    Position #= (PrevHouse - 1) * NumeroCasas + House,
+getRouteTime([CasaAnterior, Casa], ListaTemposViagem, HorarioPreferido, [TempoCasaAnterior, TempoCasa], Atraso, NumeroCasas):-
+    Position #= (CasaAnterior - 1) * NumeroCasas + Casa,
     element(Position, ListaTemposViagem, TempoEntreCasas),
-    HouseTime #= (PrevHouseTime + 5) + TempoEntreCasas,
+    TempoCasa #= (TempoCasaAnterior + 5) + TempoEntreCasas,
 
-    % Get Delay
-    element(House, HorarioPreferido, DeliveryTime),
-    SignedDelay #= HouseTime - DeliveryTime - 40,
-    convertDelay(SignedDelay, Atraso)
+    
+    element(Casa, HorarioPreferido, TempoEntrega),
+    AtrasoSign #= TempoCasa - TempoEntrega - 40,
+    convertDelay(AtrasoSign, Atraso)
 .
 
-getRouteTime([PrevHouse, House|Rest], ListaTemposViagem, HorarioPreferido, [PrevHouseTime, HouseTime | RestTime], Atraso, NumeroCasas):- 
-    % Get travel Time
-    Position #= (PrevHouse - 1) * NumeroCasas + House,
+getRouteTime([CasaAnterior, Casa|Rest], ListaTemposViagem, HorarioPreferido, [TempoCasaAnterior, TempoCasa | RestTime], Atraso, NumeroCasas):- 
+    
+    Position #= (CasaAnterior - 1) * NumeroCasas + Casa,
     element(Position, ListaTemposViagem, TempoEntreCasas),
-    HouseTime #= TempoEntreCasas + (PrevHouseTime + 5),
+    TempoCasa #= TempoEntreCasas + (TempoCasaAnterior + 5),
 
     % Get Delay
-    element(House, HorarioPreferido, DeliveryTime),
-    SignedDelay #= HouseTime - DeliveryTime - 40,
-    convertDelay(SignedDelay, UnsignedDelay),
-    Atraso #= UnsignedDelay + NewDelay,
+    element(Casa, HorarioPreferido, TempoEntrega),
+    AtrasoSign #= TempoCasa - TempoEntrega - 40,
+    convertDelay(AtrasoSign, AtrasoUnsign),
+    Atraso #= AtrasoUnsign + NewDelay,
 
-    getRouteTime([House|Rest], ListaTemposViagem, HorarioPreferido, [HouseTime | RestTime], NewDelay, NumeroCasas)
+    getRouteTime([Casa|Rest], ListaTemposViagem, HorarioPreferido, [TempoCasa | RestTime], NewDelay, NumeroCasas)
 .
 
 evaluateRoute(TempoTotal, Atraso, Score):-
     Score #= TempoTotal + Atraso
 .
 
-convertDelay(SignedDelay, UnsignedDelay):-
-    SignedDelay #< 0,
-    UnsignedDelay #= SignedDelay * -1
+convertDelay(AtrasoSign, AtrasoUnsign):-
+    AtrasoSign #< 0,
+    AtrasoUnsign #= AtrasoSign * -1
 .
 
-convertDelay(SignedDelay, SignedDelay).
+convertDelay(AtrasoSign, AtrasoSign).
 
 printSolution([], []).
 printSolution(Caminho, MomentoEntrega):-
