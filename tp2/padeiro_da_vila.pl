@@ -1,8 +1,14 @@
 :-use_module(library(clpfd)).
 :-use_module(library(lists)).
 
+problema_modelo(Pedidos, TempoEntreCasas, TempoPadariaCasas):-
+    Pedidos = [10, 50, 47, 33], 
+    TempoEntreCasas = [[0, 3, 15, 10], [3, 0, 12, 25], [15, 12, 0, 5], [10, 25, 5, 0]],
+    TempoPadariaCasas = [10, 5, 10, 15].
+
 padeiro:-
-    problem([10, 50, 47, 33], [[0, 3, 15, 10], [3, 0, 12, 25], [15, 12, 0, 5], [10, 25, 5, 0]], [10, 5, 10, 15]).
+    problema_modelo(Pedidos, TempoEntreCasas, TempoPadariaCasas),
+    problem(Pedidos, TempoEntreCasas, TempoPadariaCasas).
 
 problem(HorarioPreferido, TempoEntreCasas, TempoPadariaCasas):-
     
@@ -12,7 +18,7 @@ problem(HorarioPreferido, TempoEntreCasas, TempoPadariaCasas):-
 
     declareVars(Caminho, MomentoEntrega, NumeroCasas),
 
-    restriction1(Caminho, MomentoEntrega),
+    restrictDistinctValues(Caminho, MomentoEntrega),
 
     restriction2(Caminho, TempoPadariaCasas, MomentoEntrega),
 
@@ -20,11 +26,11 @@ problem(HorarioPreferido, TempoEntreCasas, TempoPadariaCasas):-
 
     restriction4(NumeroCasas, Caminho, TempoPadariaCasas, MomentoEntrega, TempoTotal),
 
-    evaluateRoute(TempoTotal, Atraso, Score),
+    calculoDeTempoParaMinimizacao(TempoTotal, Atraso, Score),
 
     labeling([minimize(Score)], Caminho),
 
-    printSolution(Caminho, MomentoEntrega)
+    printSolution(Caminho, MomentoEntrega, Atraso, Score)
 .
 
 
@@ -43,7 +49,6 @@ printProblem(HorarioPreferido, TempoEntreCasas, TempoPadariaCasas):-
 getLengths(HorarioPreferido,Caminho,MomentoEntrega,NumeroCasas):-
     
     length(HorarioPreferido, NumeroCasas),
-
     length(Caminho, NumeroCasas),
     length(MomentoEntrega, NumeroCasas)
 .
@@ -51,10 +56,10 @@ getLengths(HorarioPreferido,Caminho,MomentoEntrega,NumeroCasas):-
 declareVars(Caminho,MomentoEntrega,NumeroCasas):-
 
     domain(Caminho, 1, NumeroCasas),
-    domain(MomentoEntrega, 1, 100000)
+    domain(MomentoEntrega, 1, 1440)
 .
 
-restriction1(Caminho,MomentoEntrega):-
+restrictDistinctValues(Caminho,MomentoEntrega):-
     all_distinct(Caminho),
     all_distinct(MomentoEntrega)
 .
@@ -67,7 +72,7 @@ restriction2(Caminho,TempoPadariaCasas,MomentoEntrega):-
 
 restriction3(TempoEntreCasas,ListaTemposViagem,HorarioPreferido, MomentoEntrega, Atraso, NumeroCasas, Caminho):-
     append(TempoEntreCasas, ListaTemposViagem),
-    getRouteTime(Caminho, ListaTemposViagem, HorarioPreferido, MomentoEntrega, Atraso, NumeroCasas)
+    calcularTempos(HorarioPreferido, ListaTemposViagem, Caminho, MomentoEntrega, Atraso, NumeroCasas)
 .
 
 restriction4(NumeroCasas,Caminho,TempoPadariaCasas,MomentoEntrega,TempoTotal):-
@@ -77,74 +82,48 @@ restriction4(NumeroCasas,Caminho,TempoPadariaCasas,MomentoEntrega,TempoTotal):-
     TempoTotal #= UltimoMomento + TempoUltimaPadaria
 .
 
-getRouteTime([CasaAnterior, Casa], ListaTemposViagem, HorarioPreferido, [TempoCasaAnterior, TempoCasa], Atraso, NumeroCasas):-
-    Position #= (CasaAnterior - 1) * NumeroCasas + Casa,
-    element(Position, ListaTemposViagem, TempoEntreCasas),
-    TempoCasa #= (TempoCasaAnterior + 5) + TempoEntreCasas,
-
-    
-    element(Casa, HorarioPreferido, TempoEntrega),
-    AtrasoSign #= TempoCasa - TempoEntrega - 40,
-    convertDelay(AtrasoSign, Atraso)
-.
-
-getRouteTime([CasaAnterior, Casa|Rest], ListaTemposViagem, HorarioPreferido, [TempoCasaAnterior, TempoCasa | RestTime], Atraso, NumeroCasas):- 
-    
-    Position #= (CasaAnterior - 1) * NumeroCasas + Casa,
-    element(Position, ListaTemposViagem, TempoEntreCasas),
+calcularTempos(HorarioPreferido, ListaTemposViagem, [CasaAnterior, Casa], [TempoCasaAnterior, TempoCasa], Atraso, NumeroCasas):-
+    Pos #= Casa + NumeroCasas * (CasaAnterior - 1),
+    element(Pos, ListaTemposViagem, TempoEntreCasas),
     TempoCasa #= TempoEntreCasas + (TempoCasaAnterior + 5),
-
-    % Get Delay
     element(Casa, HorarioPreferido, TempoEntrega),
-    AtrasoSign #= TempoCasa - TempoEntrega - 40,
-    convertDelay(AtrasoSign, AtrasoUnsign),
-    Atraso #= AtrasoUnsign + NewDelay,
-
-    getRouteTime([Casa|Rest], ListaTemposViagem, HorarioPreferido, [TempoCasa | RestTime], NewDelay, NumeroCasas)
+    AtrasoCalculo #= 40 - TempoCasa - TempoEntrega,
+    AtrasoCalculo #< 0,
+    Atraso #= AtrasoCalculo * -1
+    %convertDelay(AtrasoCalculo, Atraso)
 .
 
-evaluateRoute(TempoTotal, Atraso, Score):-
-    Score #= TempoTotal + Atraso
+calcularTempos(HorarioPreferido, ListaTemposViagem, [CasaAnterior, Casa|RestoCasas], [TempoCasaAnterior, TempoCasa | RestoTemposCasas], Atraso, NumeroCasas):- 
+    
+    Pos #= Casa + NumeroCasas * (CasaAnterior - 1),
+    element(Pos, ListaTemposViagem, TempoEntreCasas),
+    TempoCasa #= TempoEntreCasas + (TempoCasaAnterior + 5),
+    element(Casa, HorarioPreferido, TempoEntrega),
+    AtrasoCalculo #= 40 - TempoCasa - TempoEntrega,
+    AtrasoCalculo #< 0,
+    AtrasoAbs #= AtrasoCalculo * -1,
+    %convertDelay(AtrasoCalculo, AtrasoAbs),
+    Atraso #= AtrasoAbs + NovoAtraso,
+
+    calcularTempos(HorarioPreferido, ListaTemposViagem, [Casa|RestoCasas], [TempoCasa | RestoTemposCasas], NovoAtraso, NumeroCasas)
 .
 
-convertDelay(AtrasoSign, AtrasoUnsign):-
-    AtrasoSign #< 0,
-    AtrasoUnsign #= AtrasoSign * -1
+calculoDeTempoParaMinimizacao(TempoTotal, Atraso, Valor):-
+    Valor #= TempoTotal + Atraso
 .
 
-convertDelay(AtrasoSign, AtrasoSign).
 
-printSolution([], []).
-printSolution(Caminho, MomentoEntrega):-
-    write('\n  Caminho  \n'),
-    displayRoute(Caminho),
-    displayHeader,
-    displayTableContent(Caminho, MomentoEntrega)
-.
-
-displayHeader:-
+%printSolution([], []).
+printSolution(Caminho, MomentoEntrega, Atraso, Score):-
     nl,
-    write('House  Instants'),
-    nl
-.
-
-displayRoute([House|[]]):-
-    write(House),
-    nl
-.
-
-displayRoute([House|Rest]):- 
-    write(House),
-    write(' ---> '),
-    displayRoute(Rest)
-.
-
-displayTableContent([],[]).
-displayTableContent([House|Rest], [TempoTotal|RestTime]):-
-    write('   '),
-    write(House),
-    write(' --> '),
-    write(TempoTotal),
+    write('Caminho: '),
+    write(Caminho),
     nl,
-    displayTableContent(Rest, RestTime)
-.
+    write('Momento de Entrega: '),
+    write(MomentoEntrega),
+    nl,
+    write('Atraso: '), 
+    write(Atraso),
+    nl,
+    write('Score: '),
+    write(Score).
