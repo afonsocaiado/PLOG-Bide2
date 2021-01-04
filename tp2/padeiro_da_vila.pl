@@ -6,6 +6,16 @@ problema_modelo(Pedidos, TempoEntreCasas, TempoPadariaCasas):-
     TempoEntreCasas = [[0, 3, 15, 10, 5], [3, 0, 12, 25, 8], [15, 12, 0, 5, 9], [10, 25, 5, 0, 10],[5, 8, 9, 10, 0]],
     TempoPadariaCasas = [10, 5, 10, 15, 8].
 
+problema_modelo6(Pedidos, TempoEntreCasas, TempoPadariaCasas):-
+    Pedidos = [10, 50, 47, 33, 65,88], 
+    TempoEntreCasas = [[0, 3, 15, 10, 5,5], [3, 0, 12, 25, 8,10], [15, 12, 0, 5, 9,16], [10, 25, 5, 0, 10,12],[5, 8, 9, 10, 0,3],[5,10,16,12,3,0]],
+    TempoPadariaCasas = [10, 5, 10, 15, 8, 11].
+
+problema_modelo10(Pedidos, TempoEntreCasas, TempoPadariaCasas):-
+    Pedidos = [10, 50, 47, 33, 65, 88, 90, 40, 77, 100], 
+    TempoEntreCasas = [[0, 3, 15, 10, 5, 5,5,18,11,3], [3, 0, 12, 25, 8,10,10,5,30,25], [15, 12, 0, 5, 9,16,15,14,10,19], [10, 25, 5, 0, 10,12,20,4,13,12],[5, 8, 9, 10, 0,3,15,10,2,21],[5,10,16,12,3,0,20,22,8,9],[5,10,15,20,15,20,0,11,19,15],[18,5,14,4,10,22,11,0,15,10],[11,30,10,13,2,8,19,15,0,10],[3,25,19,12,21,9,15,10,10,0]],
+    TempoPadariaCasas = [10, 5, 10, 15, 8, 11, 20, 11, 18, 22, 6].
+
 padeiro:-
     problema_modelo(Pedidos, TempoEntreCasas, TempoPadariaCasas),
     problem(Pedidos, TempoEntreCasas, TempoPadariaCasas).
