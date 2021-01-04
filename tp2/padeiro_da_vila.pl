@@ -1,113 +1,110 @@
-
 :-use_module(library(clpfd)).
 :-use_module(library(lists)).
 
-main:-
-    baker([85, 98, 60, 70], [[0, 3, 14, 1], [15, 0, 10, 25], [14, 10, 0, 3], [1, 25, 3, 0]], [10, 5, 20, 15]).
+padeiro:-
+    problem([10, 50, 47, 33], [[0, 3, 15, 10], [3, 0, 12, 25], [15, 12, 0, 5], [10, 25, 5, 0]], [10, 5, 10, 15]).
 
-baker(PreferedTime, HouseTravelTime, BakeryTravelTime):-
+problem(HorarioPreferido, TempoEntreCasas, TempoPadariaCasas):-
     
-    printProblem(PreferedTime, HouseTravelTime, BakeryTravelTime),
+    printProblem(HorarioPreferido, TempoEntreCasas, TempoPadariaCasas),
 
-    getLengths(PreferedTime,Route,DeliveryInstants,NumberOfHouses),
+    getLengths(HorarioPreferido, Caminho, MomentoEntrega, NumeroCasas),
 
-    declareVars(Route,DeliveryInstants,NumberOfHouses),
+    declareVars(Caminho, MomentoEntrega, NumeroCasas),
 
-    % Restrictions
+    restriction1(Caminho, MomentoEntrega),
 
-    restriction1(Route,DeliveryInstants),
+    restriction2(Caminho, TempoPadariaCasas, MomentoEntrega),
 
-    restriction2(Route,BakeryTravelTime,DeliveryInstants),
+    restriction3(TempoEntreCasas, ListaTemposViagem, HorarioPreferido, MomentoEntrega, Atraso, NumeroCasas, Caminho),
 
-    restriction3(HouseTravelTime,TravelTimeList,PreferedTime, DeliveryInstants, Delay, NumberOfHouses,Delay,Route),
+    restriction4(NumeroCasas, Caminho, TempoPadariaCasas, MomentoEntrega, TempoTotal),
 
-    restriction4(NumberOfHouses,Route,BakeryTravelTime,DeliveryInstants,Time),
+    evaluateRoute(TempoTotal, Atraso, Score),
 
-    evaluateRoute(Time, Delay, Score),
+    labeling([minimize(Score)], Caminho),
 
-    labeling([minimize(Score)], Route),
-
-    printSolution(Route, DeliveryInstants)
+    printSolution(Caminho, MomentoEntrega)
 .
 
 
-printProblem(PreferedTime, HouseTravelTime, BakeryTravelTime):-
-    write('PreferedTime = '),
-    write(PreferedTime),
+printProblem(HorarioPreferido, TempoEntreCasas, TempoPadariaCasas):-
+    write('HorarioPreferido = '),
+    write(HorarioPreferido),
     write('\n'),
-    write('HouseTravelTime = '),
-    write(HouseTravelTime),
+    write('TempoEntreCasas = '),
+    write(TempoEntreCasas),
     write('\n'),
-    write('BakeryTravelTime = '),
-    write(BakeryTravelTime),
+    write('TempoPadariaCasas = '),
+    write(TempoPadariaCasas),
     write('\n')
 .
 
-getLengths(PreferedTime,Route,DeliveryInstants,NumberOfHouses):-
+getLengths(HorarioPreferido,Caminho,MomentoEntrega,NumeroCasas):-
     
-    length(PreferedTime, NumberOfHouses),
+    length(HorarioPreferido, NumeroCasas),
 
-    length(Route, NumberOfHouses),
-    length(DeliveryInstants, NumberOfHouses)
+    length(Caminho, NumeroCasas),
+    length(MomentoEntrega, NumeroCasas)
 .
 
-declareVars(Route,DeliveryInstants,NumberOfHouses):-
+declareVars(Caminho,MomentoEntrega,NumeroCasas):-
 
-    domain(Route, 1, NumberOfHouses),
-    domain(DeliveryInstants, 1, 100000)
+    domain(Caminho, 1, NumeroCasas),
+    domain(MomentoEntrega, 1, 100000)
 .
 
-restriction1(Route,DeliveryInstants):-
-    all_distinct(Route),
-    all_distinct(DeliveryInstants)
+restriction1(Caminho,MomentoEntrega):-
+    all_distinct(Caminho),
+    all_distinct(MomentoEntrega)
 .
 
-restriction2(Route,BakeryTravelTime,DeliveryInstants):-
-    element(1, Route, FirstHouseID),
-    element(FirstHouseID, BakeryTravelTime, BakeryToHouseTime),
-    element(1, DeliveryInstants, BakeryToHouseTime)
+restriction2(Caminho,TempoPadariaCasas,MomentoEntrega):-
+    element(1, Caminho, FirstHouseID),
+    element(FirstHouseID, TempoPadariaCasas, BakeryToHouseTime),
+    element(1, MomentoEntrega, BakeryToHouseTime)
 .
 
-restriction3(HouseTravelTime,TravelTimeList,PreferedTime, DeliveryInstants, Delay, NumberOfHouses,Delay,Route):-
-    append(HouseTravelTime, TravelTimeList),
-    getRouteTime(Route, TravelTimeList, PreferedTime, DeliveryInstants, Delay, NumberOfHouses)
+restriction3(TempoEntreCasas,ListaTemposViagem,HorarioPreferido, MomentoEntrega, Atraso, NumeroCasas, Caminho):-
+    append(TempoEntreCasas, ListaTemposViagem),
+    getRouteTime(Caminho, ListaTemposViagem, HorarioPreferido, MomentoEntrega, Atraso, NumeroCasas)
 .
 
-restriction4(NumberOfHouses,Route,BakeryTravelTime,DeliveryInstants,Time):-
-    element(NumberOfHouses, Route, LastHouseID),
-    element(LastHouseID, BakeryTravelTime, HouseToBakeryTime),
-    element(NumberOfHouses, DeliveryInstants, LastInstant),
-    Time #= LastInstant + HouseToBakeryTime
+restriction4(NumeroCasas,Caminho,TempoPadariaCasas,MomentoEntrega,TempoTotal):-
+    element(NumeroCasas, Caminho, LastHouseID),
+    element(LastHouseID, TempoPadariaCasas, HouseToBakeryTime),
+    element(NumeroCasas, MomentoEntrega, LastInstant),
+    TempoTotal #= LastInstant + HouseToBakeryTime
 .
 
-getRouteTime([PrevHouse, House], TravelTimeList, PreferedTime, [PrevHouseTime, HouseTime], Delay, NumberOfHouses):-
-    Position #= (PrevHouse - 1) * NumberOfHouses + House,
-    element(Position, TravelTimeList, HouseTravelTime),
-    HouseTime #= (PrevHouseTime + 5) + HouseTravelTime,
+getRouteTime([PrevHouse, House], ListaTemposViagem, HorarioPreferido, [PrevHouseTime, HouseTime], Atraso, NumeroCasas):-
+    Position #= (PrevHouse - 1) * NumeroCasas + House,
+    element(Position, ListaTemposViagem, TempoEntreCasas),
+    HouseTime #= (PrevHouseTime + 5) + TempoEntreCasas,
 
     % Get Delay
-    element(House, PreferedTime, DeliveryTime),
+    element(House, HorarioPreferido, DeliveryTime),
     SignedDelay #= HouseTime - DeliveryTime - 40,
-    convertDelay(SignedDelay, Delay)
+    convertDelay(SignedDelay, Atraso)
 .
 
-getRouteTime([PrevHouse, House|Rest], TravelTimeList, PreferedTime, [PrevHouseTime, HouseTime | RestTime], Delay, NumberOfHouses):- 
+getRouteTime([PrevHouse, House|Rest], ListaTemposViagem, HorarioPreferido, [PrevHouseTime, HouseTime | RestTime], Atraso, NumeroCasas):- 
     % Get travel Time
-    Position #= (PrevHouse - 1) * NumberOfHouses + House,
-    element(Position, TravelTimeList, HouseTravelTime),
-    HouseTime #= HouseTravelTime + (PrevHouseTime + 5),
+    Position #= (PrevHouse - 1) * NumeroCasas + House,
+    element(Position, ListaTemposViagem, TempoEntreCasas),
+    HouseTime #= TempoEntreCasas + (PrevHouseTime + 5),
 
     % Get Delay
-    element(House, PreferedTime, DeliveryTime),
+    element(House, HorarioPreferido, DeliveryTime),
     SignedDelay #= HouseTime - DeliveryTime - 40,
     convertDelay(SignedDelay, UnsignedDelay),
-    Delay #= UnsignedDelay + NewDelay,
+    Atraso #= UnsignedDelay + NewDelay,
 
-    getRouteTime([House|Rest], TravelTimeList, PreferedTime, [HouseTime | RestTime], NewDelay, NumberOfHouses)
+    getRouteTime([House|Rest], ListaTemposViagem, HorarioPreferido, [HouseTime | RestTime], NewDelay, NumeroCasas)
 .
 
-evaluateRoute(Time, Delay, Score):-
-    Score #= Time + Delay
+evaluateRoute(TempoTotal, Atraso, Score):-
+    Score #= TempoTotal + Atraso
 .
 
 convertDelay(SignedDelay, UnsignedDelay):-
@@ -118,11 +115,11 @@ convertDelay(SignedDelay, UnsignedDelay):-
 convertDelay(SignedDelay, SignedDelay).
 
 printSolution([], []).
-printSolution(Route, DeliveryInstants):-
-    write('\n  Route  \n'),
-    displayRoute(Route),
+printSolution(Caminho, MomentoEntrega):-
+    write('\n  Caminho  \n'),
+    displayRoute(Caminho),
     displayHeader,
-    displayTableContent(Route, DeliveryInstants)
+    displayTableContent(Caminho, MomentoEntrega)
 .
 
 displayHeader:-
@@ -143,11 +140,11 @@ displayRoute([House|Rest]):-
 .
 
 displayTableContent([],[]).
-displayTableContent([House|Rest], [Time|RestTime]):-
+displayTableContent([House|Rest], [TempoTotal|RestTime]):-
     write('   '),
     write(House),
     write(' --> '),
-    write(Time),
+    write(TempoTotal),
     nl,
     displayTableContent(Rest, RestTime)
 .
