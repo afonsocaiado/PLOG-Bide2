@@ -2,9 +2,9 @@
 :-use_module(library(lists)).
 
 problema_modelo(Pedidos, TempoEntreCasas, TempoPadariaCasas):-
-    Pedidos = [10, 50, 47, 33], 
-    TempoEntreCasas = [[0, 3, 15, 10], [3, 0, 12, 25], [15, 12, 0, 5], [10, 25, 5, 0]],
-    TempoPadariaCasas = [10, 5, 10, 15].
+    Pedidos = [10, 50, 47, 33, 65], 
+    TempoEntreCasas = [[0, 3, 15, 10, 5], [3, 0, 12, 25, 8], [15, 12, 0, 5, 9], [10, 25, 5, 0, 10],[5, 8, 9, 10, 0]],
+    TempoPadariaCasas = [10, 5, 10, 15, 8].
 
 padeiro:-
     problema_modelo(Pedidos, TempoEntreCasas, TempoPadariaCasas),
@@ -20,11 +20,11 @@ problem(HorarioPreferido, TempoEntreCasas, TempoPadariaCasas):-
 
     restrictDistinctValues(Caminho, MomentoEntrega),
 
-    restriction2(Caminho, TempoPadariaCasas, MomentoEntrega),
+    restrictApenasUmaPassagemPorCasa(Caminho, TempoPadariaCasas, MomentoEntrega),
 
-    restriction3(TempoEntreCasas, ListaTemposViagem, HorarioPreferido, MomentoEntrega, Atraso, NumeroCasas, Caminho),
+    restrictTempoEntreCasas(TempoEntreCasas, ListaTemposViagem, HorarioPreferido, MomentoEntrega, Atraso, NumeroCasas, Caminho),
 
-    restriction4(NumeroCasas, Caminho, TempoPadariaCasas, MomentoEntrega, TempoTotal),
+    restrictionTempoFinal(NumeroCasas, Caminho, TempoPadariaCasas, MomentoEntrega, TempoTotal),
 
     calculoDeTempoParaMinimizacao(TempoTotal, Atraso, Score),
 
@@ -64,46 +64,51 @@ restrictDistinctValues(Caminho,MomentoEntrega):-
     all_distinct(MomentoEntrega)
 .
 
-restriction2(Caminho,TempoPadariaCasas,MomentoEntrega):-
+restrictApenasUmaPassagemPorCasa(Caminho,TempoPadariaCasas,MomentoEntrega):-
     element(1, Caminho, IDPrimeiraCasa),
     element(IDPrimeiraCasa, TempoPadariaCasas, TempoPadariaPrimeira),
     element(1, MomentoEntrega, TempoPadariaPrimeira)
 .
 
-restriction3(TempoEntreCasas,ListaTemposViagem,HorarioPreferido, MomentoEntrega, Atraso, NumeroCasas, Caminho):-
+restrictTempoEntreCasas(TempoEntreCasas,ListaTemposViagem,HorarioPreferido, MomentoEntrega, Atraso, NumeroCasas, Caminho):-
     append(TempoEntreCasas, ListaTemposViagem),
     calcularTempos(HorarioPreferido, ListaTemposViagem, Caminho, MomentoEntrega, Atraso, NumeroCasas)
 .
 
-restriction4(NumeroCasas,Caminho,TempoPadariaCasas,MomentoEntrega,TempoTotal):-
+restrictionTempoFinal(NumeroCasas,Caminho,TempoPadariaCasas,MomentoEntrega,TempoTotal):-
     element(NumeroCasas, Caminho, IDUltimaCasa),
-    element(IDUltimaCasa, TempoPadariaCasas, TempoUltimaPadaria),
-    element(NumeroCasas, MomentoEntrega, UltimoMomento),
-    TempoTotal #= UltimoMomento + TempoUltimaPadaria
+    element(IDUltimaCasa, TempoPadariaCasas, TempoTotal)
 .
+
+calcularAtraso(TempoEntregaPreferido, TempoDaEntrega, TempoDaEntrega, Atraso):-
+    Atraso is 0,
+    TempoDaEntrega #>= TempoEntregaPreferido - 40,
+    TempoDaEntrega #=< TempoEntregaPreferido - 10.
+calcularAtraso(TempoEntregaPreferido, TempoDaEntrega, TempoDaEntrega, Atraso):-
+    GetToHouseTime #> TempoEntregaPreferido - 10,
+    Atraso #= TempoDaEntrega - TempoEntregaPreferido.
+calcularAtraso(TempoEntregaPreferido, TempoCasa, _, Atraso):-
+    Atraso is 0,
+    TimeAtHouse #= TempoEntregaPreferido - 10.
 
 calcularTempos(HorarioPreferido, ListaTemposViagem, [CasaAnterior, Casa], [TempoCasaAnterior, TempoCasa], Atraso, NumeroCasas):-
     Pos #= Casa + NumeroCasas * (CasaAnterior - 1),
     element(Pos, ListaTemposViagem, TempoEntreCasas),
-    TempoCasa #= TempoEntreCasas + (TempoCasaAnterior + 5),
-    element(Casa, HorarioPreferido, TempoEntrega),
-    AtrasoCalculo #= 40 - TempoCasa - TempoEntrega,
-    AtrasoCalculo #< 0,
-    Atraso #= AtrasoCalculo * -1
-    %convertDelay(AtrasoCalculo, Atraso)
-.
+    TempoDaEntrega #= TempoEntreCasas + (TempoCasaAnterior + 5),
+    element(Casa, HorarioPreferido, TempoEntregaPreferido),
 
+    calcularAtraso(TempoEntregaPreferido, TempoCasa, TempoDaEntrega, Atraso)
+.
 calcularTempos(HorarioPreferido, ListaTemposViagem, [CasaAnterior, Casa|RestoCasas], [TempoCasaAnterior, TempoCasa | RestoTemposCasas], Atraso, NumeroCasas):- 
     
     Pos #= Casa + NumeroCasas * (CasaAnterior - 1),
     element(Pos, ListaTemposViagem, TempoEntreCasas),
-    TempoCasa #= TempoEntreCasas + (TempoCasaAnterior + 5),
-    element(Casa, HorarioPreferido, TempoEntrega),
-    AtrasoCalculo #= 40 - TempoCasa - TempoEntrega,
-    AtrasoCalculo #< 0,
-    AtrasoAbs #= AtrasoCalculo * -1,
-    %convertDelay(AtrasoCalculo, AtrasoAbs),
-    Atraso #= AtrasoAbs + NovoAtraso,
+    TempoDaEntrega #= TempoEntreCasas + (TempoCasaAnterior + 5),
+    element(Casa, HorarioPreferido, TempoEntregaPreferido),
+
+    calcularAtraso(TempoEntregaPreferido, TempoCasa, TempoDaEntrega, AtrasoAtual),
+
+    Atraso #= AtrasoAtual + NovoAtraso,
 
     calcularTempos(HorarioPreferido, ListaTemposViagem, [Casa|RestoCasas], [TempoCasa | RestoTemposCasas], NovoAtraso, NumeroCasas)
 .
